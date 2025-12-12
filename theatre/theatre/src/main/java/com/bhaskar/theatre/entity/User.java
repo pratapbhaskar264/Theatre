@@ -14,32 +14,32 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name ="users" , uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"username"})
-})
-public class User {
+@Table(name ="users")
+public class User implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
      private Long id;
 
-    @Column(nullable = false,length = 50)
-     private String username;
 
-    @Column(nullable = false,columnDefinition = "text")
+
+//    @Column(nullable = false,columnDefinition = "text")
      private String password;
 
     @Column(length = 50)
      private String firstName;
 
+
     @Column(length = 50)
      private String lastName;
 
+    private String email;
+    private String username;
     @Column(length = 50)
      private String country;
 
     @Enumerated(EnumType.STRING)
-     private Movie role;
+     private Role role;
 
 
 
