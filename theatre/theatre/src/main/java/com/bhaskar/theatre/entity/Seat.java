@@ -1,5 +1,6 @@
 package com.bhaskar.theatre.entity;
 
+import com.bhaskar.theatre.enums.SeatStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
