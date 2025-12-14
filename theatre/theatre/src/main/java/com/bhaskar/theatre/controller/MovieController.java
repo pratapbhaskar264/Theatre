@@ -63,5 +63,27 @@ public class MovieController {
                                 .build()
                 );
     }
+
+    @PutMapping("/movie/update/{movieId}")
+    public ResponseEntity<ApiResponseDto> updateMovieById(@PathVariable long movieId, @RequestBody MovieRequestDto movieRequestDto){
+        Movie movie = movieService.updateMovieById(movieId, movieRequestDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        ApiResponseDto.builder()
+                                .message("Movie updated")
+                                .data(movie)
+                                .build()
+                );
+    }
+
+    @DeleteMapping("/movie/delete/{movieId}")
+    public ResponseEntity<?> deleteMovieById(@PathVariable long movieId){
+        movieService.deleteMovieById(movieId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
 }
 

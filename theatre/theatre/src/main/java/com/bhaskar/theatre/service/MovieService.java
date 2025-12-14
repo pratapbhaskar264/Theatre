@@ -16,4 +16,13 @@ public class MovieService {
     public Movie createNewMovie(MovieRequestDto movieRequestDto) {
         return null;
     }
+
+    public Movie updateMovieById(long movieId, MovieRequestDto movieRequestDto) {
+        return null;
+    }
+
+
+    public void deleteMovieById(long movieId) {
+        return;
+    }
 }
