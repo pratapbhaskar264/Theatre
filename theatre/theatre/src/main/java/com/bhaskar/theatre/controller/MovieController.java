@@ -1,17 +1,14 @@
 package com.bhaskar.theatre.controller;
 
 
-
+import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.entity.Movie;
 import com.bhaskar.theatre.service.MovieService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,5 +39,16 @@ public class MovieController {
     }
 
     @GetMapping("/movie/{movieId}")
+    public ResponseEntity<PagedApiResponseDto> getMovieById(@PathVariable long movieId){
+        Movie movie = movieService.getMovieById(movieId);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .message("Fetched movie with id: " + movieId)
+                        .data(movie)
+                        .build()
+        );
+    }
+
 }
 
