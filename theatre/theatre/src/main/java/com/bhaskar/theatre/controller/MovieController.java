@@ -40,7 +40,7 @@ public class MovieController {
     }
 
     @GetMapping("/movie/{movieId}")
-    public ResponseEntity<PagedApiResponseDto> getMovieById(@PathVariable long movieId){
+    public ResponseEntity<ApiResponseDto> getMovieById(@PathVariable long movieId){
         Movie movie = movieService.getMovieById(movieId);
 
         return ResponseEntity.ok(
