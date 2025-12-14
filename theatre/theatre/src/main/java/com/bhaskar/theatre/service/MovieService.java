@@ -1,5 +1,6 @@
 package com.bhaskar.theatre.service;
 
+import com.bhaskar.theatre.dto.MovieRequestDto;
 import com.bhaskar.theatre.entity.Movie;
 import org.springframework.data.domain.Page;
 
@@ -9,6 +10,10 @@ public class MovieService {
     }
 
     public Movie getMovieById(long movieId) {
+        return null;
+    }
+
+    public Movie createNewMovie(MovieRequestDto movieRequestDto) {
         return null;
     }
 }

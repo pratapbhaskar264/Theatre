@@ -1,11 +1,12 @@
 package com.bhaskar.theatre.controller;
 
-
+import com.bhaskar.theatre.dto.MovieRequestDto;
 import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.entity.Movie;
 import com.bhaskar.theatre.service.MovieService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -50,5 +51,17 @@ public class MovieController {
         );
     }
 
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponseDto> createNewMovie(@RequestBody MovieRequestDto movieRequestDto){
+        Movie movie = movieService.createNewMovie(movieRequestDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        ApiResponseDto.builder()
+                                .message("Movie created")
+                                .data(movie)
+                                .build()
+                );
+    }
 }
 
