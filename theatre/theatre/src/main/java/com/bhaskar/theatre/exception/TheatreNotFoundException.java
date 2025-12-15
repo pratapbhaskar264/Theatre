@@ -1,4 +1,9 @@
 package com.bhaskar.theatre.exception;
 
-public class TheatreNotFoundException {
+import org.springframework.http.HttpStatus;
+
+public class TheaterNotFoundException extends CustomException {
+    public TheaterNotFoundException(String message, HttpStatus httpStatus) {
+        super(message, httpStatus);
+    }
 }

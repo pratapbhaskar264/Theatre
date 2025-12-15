@@ -1,19 +1,29 @@
 package com.bhaskar.theatre.service;
 
+import com.bhaskar.theatre.dto.ShowRequestDto;
+import com.bhaskar.theatre.entity.Movie;
+import com.bhaskar.theatre.entity.Seat;
 import com.bhaskar.theatre.entity.Show;
+import com.bhaskar.theatre.exception.MovieNotFoundException;
 import com.bhaskar.theatre.exception.ShowNotFoundException;
+//import com.bhaskar.theatre.exception.TheaterNotFoundException;
+import com.bhaskar.theatre.exception.TheaterNotFoundException;
 import com.bhaskar.theatre.repository.MovieRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.TheatreRespository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.bhaskar.theatre.constant.ExceptionMessages.SHOW_NOT_FOUND;
+import static com.bhaskar.theatre.constant.ExceptionMessages.*;
 
 @Service
 public class ShowService {
@@ -101,4 +111,35 @@ public class ShowService {
     public void deleteShowById(long showId) {
         showRepository.deleteById(showId);
     }
+
+    @Transactional
+    public Show createNewShow(ShowRequestDto showRequestDto) {
+        return movieRepository.findById(showRequestDto.getMovieId())
+                .map(movie -> theatreRepository.findById(showRequestDto.getTheaterId())
+                        .map(theater -> {
+                            List<Seat> seats = new ArrayList<>();
+                            showRequestDto.getSeats()
+                                    .forEach(seatStructure ->
+                                            seats.addAll(
+                                                    seatService.createSeatsWithGivenPrice(
+                                                            seatStructure.getSeatCount(),
+                                                            seatStructure.getSeatPrice(),
+                                                            seatStructure.getArea()
+                                                    )
+                                            )
+                                    );
+
+                            Show show = Show.builder()
+                                    .movie(movie)
+                                    .theater(theater)
+                                    .startTime(LocalDateTime.parse(showRequestDto.getStartTime()))
+                                    .endTime(LocalDateTime.parse(showRequestDto.getEndTime()))
+                                    .seats(seats)
+                                    .build();
+                            return showRepository.save(show);
+                        })
+                        .orElseThrow(() -> new TheaterNotFoundException(THEATER_NOT_FOUND, HttpStatus.BAD_REQUEST)))
+                .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.BAD_REQUEST));
+    }
+
 }
