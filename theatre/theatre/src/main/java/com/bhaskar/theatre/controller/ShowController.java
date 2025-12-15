@@ -8,6 +8,7 @@ import com.bhaskar.theatre.service.ShowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -119,7 +120,11 @@ public class ShowController {
         );
     }
 
-
+    @DeleteMapping("/show/delete/{showId}")
+    public ResponseEntity<?> deleteShowById(@PathVariable long showId){
+        showService.deleteShowById(showId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 
 
 }

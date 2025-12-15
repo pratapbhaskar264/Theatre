@@ -97,4 +97,8 @@ public class ShowService {
         return showRepository.findById(showId)
                 .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
+
+    public void deleteShowById(long showId) {
+        showRepository.deleteById(showId);
+    }
 }
