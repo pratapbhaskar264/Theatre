@@ -1,5 +1,6 @@
 package com.bhaskar.theatre.controller;
 
+import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.service.ShowService;
@@ -7,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/shows")
@@ -54,6 +52,17 @@ public class ShowController {
                         .currentPageData(showPage.getContent())
                         .totalElements(showPage.getTotalElements())
                         .totalPages(showPage.getTotalPages())
+                        .build()
+        );
+    }
+
+    @GetMapping("/show/{showId}")
+    public ResponseEntity<ApiResponseDto> getShowById(@PathVariable long showId){
+        Show show = showService.getShowById(showId);
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .data(show)
+                        .message("Fetched show with id: " + show.getId())
                         .build()
         );
     }

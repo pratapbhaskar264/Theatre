@@ -1,13 +1,17 @@
 package com.bhaskar.theatre.service;
 
 import com.bhaskar.theatre.entity.Show;
+import com.bhaskar.theatre.exception.ShowNotFoundException;
 import com.bhaskar.theatre.repository.MovieRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.TheatreRespository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import static com.bhaskar.theatre.constant.ExceptionMessages.SHOW_NOT_FOUND;
 
 @Service
 public class ShowService {
@@ -36,5 +40,11 @@ public class ShowService {
             return showRepository.findByMovieId(movieId, pageRequest);
         }
         return showRepository.findByTheaterIdAndMovieId(theaterId, movieId, pageRequest);
+    }
+
+
+    public Show getShowById(long showId) {
+        return showRepository.findById(showId)
+                .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 }
