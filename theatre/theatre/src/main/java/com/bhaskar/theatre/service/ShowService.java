@@ -28,4 +28,13 @@ public class ShowService {
     public Page<Show> getllShows(int page, int size) {
         return showRepository.findAll(PageRequest.of(page, size));
     }
+
+    public Page<Show> filterShowsByTheaterIdAndMovieId(Long theaterId, Long movieId, PageRequest pageRequest) {
+        if(theaterId == null && movieId == null){
+            return showRepository.findAll(pageRequest);
+        } else if(theaterId == null){
+            return showRepository.findByMovieId(movieId, pageRequest);
+        }
+        return showRepository.findByTheaterIdAndMovieId(theaterId, movieId, pageRequest);
+    }
 }

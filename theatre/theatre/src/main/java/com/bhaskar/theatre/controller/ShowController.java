@@ -5,6 +5,7 @@ import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.service.ShowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,25 @@ public class ShowController {
                         .build()
         );
     }
+    @GetMapping("/filter")
+    public ResponseEntity<PagedApiResponseDto> filterShows(
+            @RequestParam(required = false) Long theaterId,
+            @RequestParam(required = false) Long movieId,
+            @RequestParam(required = false) String showDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Page<Show> showPage = showService.filterShowsByTheaterIdAndMovieId(theaterId, movieId, PageRequest.of(page, size));
+        return ResponseEntity.ok(
+                PagedApiResponseDto.builder()
+                        .currentCount(showPage.getNumberOfElements())
+                        .currentPageData(showPage.getContent())
+                        .totalElements(showPage.getTotalElements())
+                        .totalPages(showPage.getTotalPages())
+                        .build()
+        );
+    }
+
 
 
 
