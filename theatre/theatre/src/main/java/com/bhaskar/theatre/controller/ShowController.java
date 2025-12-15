@@ -2,6 +2,7 @@ package com.bhaskar.theatre.controller;
 
 import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
+import com.bhaskar.theatre.dto.ShowRequestDto;
 import com.bhaskar.theatre.dto.ShowTimingUpdateDto;
 import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.service.ShowService;
@@ -68,7 +69,18 @@ public class ShowController {
                         .build()
         );
     }
-
+    @PostMapping("/show/create")
+    public ResponseEntity<ApiResponseDto> createShow(@RequestBody ShowRequestDto showRequestDto){
+        Show show = showService.createNewShow(showRequestDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        ApiResponseDto.builder()
+                                .message("Show created with id: " + show.getId())
+                                .data(show)
+                                .build()
+                );
+    }
     @PatchMapping("/show/update/movie/{showId}")
     public ResponseEntity<ApiResponseDto> updateMovie(
             @PathVariable long showId,
