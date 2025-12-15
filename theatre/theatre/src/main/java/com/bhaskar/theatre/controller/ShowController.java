@@ -2,6 +2,7 @@ package com.bhaskar.theatre.controller;
 
 import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
+import com.bhaskar.theatre.dto.ShowTimingUpdateDto;
 import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.service.ShowService;
 import org.springframework.beans.factory.annotation.Autowired;
