@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
+
 import static com.bhaskar.theatre.constant.ExceptionMessages.SHOW_NOT_FOUND;
 
 @Service
@@ -41,6 +43,54 @@ public class ShowService {
         }
         return showRepository.findByTheaterIdAndMovieId(theaterId, movieId, pageRequest);
     }
+
+    public Show updateShowMovie(long showId, long movieId) {
+
+        Show show = showRepository.findById(showId)
+                .orElseThrow(() ->
+                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
+                );
+
+        show.setMovie(
+                movieRepository.findById(movieId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Movie not found")
+                        )
+        );
+
+        return showRepository.save(show);
+    }
+
+    public Show updateShowTheatre(long showId, long theatreId) {
+
+        Show show = showRepository.findById(showId)
+                .orElseThrow(() ->
+                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
+                );
+
+        show.setTheatre(
+                theatreRepository.findById(theatreId)
+                        .orElseThrow(() ->
+                                new RuntimeException("Theatre not found")
+                        )
+        );
+
+        return showRepository.save(show);
+    }
+
+    public Show updateShowTimings(long showId, LocalTime startTime, LocalTime endTime) {
+
+        Show show = showRepository.findById(showId)
+                .orElseThrow(() ->
+                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
+                );
+
+        show.setStartTime(startTime);
+        show.setEndTime(endTime);
+
+        return showRepository.save(show);
+    }
+
 
 
     public Show getShowById(long showId) {
