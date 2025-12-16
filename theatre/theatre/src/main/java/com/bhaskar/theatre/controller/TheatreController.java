@@ -3,10 +3,12 @@ package com.bhaskar.theatre.controller;
 
 import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
+import com.bhaskar.theatre.dto.TheatreRequestDto;
 import com.bhaskar.theatre.entity.Theatre;
 import com.bhaskar.theatre.service.TheatreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +67,20 @@ public class TheatreController {
                         .build()
         );
     }
+
+    @PostMapping("/theater/create")
+    public ResponseEntity<ApiResponseDto> createTheater(@RequestBody TheatreRequestDto theaterRequestDto){
+        Theatre theater = theatreService.createNewTheatre(theaterRequestDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(
+                        ApiResponseDto.builder()
+                                .message("New Theater created with id: " + theater.getId())
+                                .data(theater)
+                                .build()
+                );
+    }
+
 
 
 

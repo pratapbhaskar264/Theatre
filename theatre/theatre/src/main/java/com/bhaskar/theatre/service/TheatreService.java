@@ -1,5 +1,6 @@
 package com.bhaskar.theatre.service;
 
+import com.bhaskar.theatre.dto.TheatreRequestDto;
 import com.bhaskar.theatre.entity.Theatre;
 import com.bhaskar.theatre.exception.TheatreNotFoundException;
 import com.bhaskar.theatre.repository.TheatreRespository;
@@ -38,5 +39,13 @@ public class TheatreService {
     public Theatre getTheatreById(long theaterId) {
         return theatreRepository.findById(theaterId)
                 .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+
+    public Theatre createNewTheatre(TheatreRequestDto theaterRequestDto) {
+        Theatre theater = Theatre.builder()
+                .name(theaterRequestDto.getName())
+                .location(theaterRequestDto.getLocation())
+                .build();
+        return theatreRepository.save(theater);
     }
 }
