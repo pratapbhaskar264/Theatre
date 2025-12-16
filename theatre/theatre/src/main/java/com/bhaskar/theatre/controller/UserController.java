@@ -1,12 +1,15 @@
 package com.bhaskar.theatre.controller;
 
 import com.bhaskar.theatre.dto.UserResponseDto;
+import com.bhaskar.theatre.exception.UsernameNotFoundException;
 import com.bhaskar.theatre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static com.bhaskar.theatre.constant.ExceptionMessages.USER_NOT_FOUND;
 
 @RestController
 @RequestMapping("/api/v1/users")
