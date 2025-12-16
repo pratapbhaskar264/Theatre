@@ -69,6 +69,7 @@ public class ShowController {
                         .build()
         );
     }
+
     @PostMapping("/show/create")
     public ResponseEntity<ApiResponseDto> createShow(@RequestBody ShowRequestDto showRequestDto){
         Show show = showService.createNewShow(showRequestDto);
@@ -81,6 +82,7 @@ public class ShowController {
                                 .build()
                 );
     }
+
     @PatchMapping("/show/update/movie/{showId}")
     public ResponseEntity<ApiResponseDto> updateMovie(
             @PathVariable long showId,

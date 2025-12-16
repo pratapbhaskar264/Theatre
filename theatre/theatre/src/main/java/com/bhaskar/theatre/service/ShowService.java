@@ -1,13 +1,11 @@
 package com.bhaskar.theatre.service;
 
 import com.bhaskar.theatre.dto.ShowRequestDto;
-import com.bhaskar.theatre.entity.Movie;
 import com.bhaskar.theatre.entity.Seat;
 import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.exception.MovieNotFoundException;
 import com.bhaskar.theatre.exception.ShowNotFoundException;
-//import com.bhaskar.theatre.exception.TheaterNotFoundException;
-import com.bhaskar.theatre.exception.TheaterNotFoundException;
+import com.bhaskar.theatre.exception.TheatreNotFoundException;
 import com.bhaskar.theatre.repository.MovieRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.TheatreRespository;
@@ -138,7 +136,7 @@ public class ShowService {
                                     .build();
                             return showRepository.save(show);
                         })
-                        .orElseThrow(() -> new TheaterNotFoundException(THEATER_NOT_FOUND, HttpStatus.BAD_REQUEST)))
+                        .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.BAD_REQUEST)))
                 .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
 

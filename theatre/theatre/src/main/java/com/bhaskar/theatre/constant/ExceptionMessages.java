@@ -6,7 +6,7 @@ public class ExceptionMessages {
     public static final String USER_EXISTS = "Username already taken";
     public static final String USER_NOT_FOUND = "Username not found";
     public static final String MOVIE_NOT_FOUND = "Movie not found";
-    public static final String THEATER_NOT_FOUND = "Theater not found";
+    public static final String THEATRE_NOT_FOUND = "Theater not found";
     public static final String SHOW_NOT_FOUND = "Show not found";
     public static final String RESERVATION_NOT_FOUND = "Reservation not found";
     public static final String AMOUNT_NOT_MATCH =
