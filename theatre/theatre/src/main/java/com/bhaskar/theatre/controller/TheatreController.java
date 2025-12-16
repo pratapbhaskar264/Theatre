@@ -81,6 +81,19 @@ public class TheatreController {
                 );
     }
 
+    @PutMapping("/theater/update/{theaterId}")
+    public ResponseEntity<ApiResponseDto> updateTheaterById(@PathVariable long theaterId, @RequestBody TheatreRequestDto theaterRequestDto){
+        Theatre updatedTheater = theatreService.updateTheatreById(theaterId, theaterRequestDto);
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .message("Theater updated")
+                        .data(updatedTheater)
+                        .build()
+        );
+    }
+
+
+
 
 
 

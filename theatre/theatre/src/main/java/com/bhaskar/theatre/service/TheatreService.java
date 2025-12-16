@@ -48,4 +48,15 @@ public class TheatreService {
                 .build();
         return theatreRepository.save(theater);
     }
+
+    public Theatre updateTheatreById(long theaterId, TheatreRequestDto theaterRequestDto) {
+        return theatreRepository.findById(theaterId)
+                .map(theater -> {
+                    theater.setName(theaterRequestDto.getName());
+                    theater.setLocation(theater.getLocation());
+                    return theatreRepository.save(theater);
+                })
+                .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.NOT_FOUND));
+    }
+    }
 }
