@@ -1,4 +1,9 @@
 package com.bhaskar.theatre.exception;
 
-public class UserExistsException {
+import org.springframework.http.HttpStatus;
+
+public class UserExistsException extends CustomException {
+    public UserExistsException(String message, HttpStatus httpStatus) {
+        super(message, httpStatus);
+    }
 }
