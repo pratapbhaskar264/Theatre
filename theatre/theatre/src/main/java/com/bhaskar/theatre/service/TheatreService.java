@@ -58,5 +58,10 @@ public class TheatreService {
                 })
                 .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
+
+    public void deleteTheatreById(long theaterId) {
+        theatreRepository.deleteById(theaterId);
+        return;
     }
 }
+

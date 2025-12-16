@@ -92,6 +92,14 @@ public class TheatreController {
         );
     }
 
+    @DeleteMapping("/theater/delete/{theaterId}")
+    public ResponseEntity<?> deleteTheaterById(@PathVariable long theaterId){
+        theatreService.deleteTheatreById(theaterId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
 
 
 
