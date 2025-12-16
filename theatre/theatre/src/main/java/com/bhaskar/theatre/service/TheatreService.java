@@ -23,4 +23,8 @@ public class TheatreService {
     }
 
 
+    public Page<Theatre> getAllTheatresByLocation(int page, int size, String location) {
+
+        return theatreRepository.findAllByLocation(location, PageRequest.of(page, size));
+    }
 }
