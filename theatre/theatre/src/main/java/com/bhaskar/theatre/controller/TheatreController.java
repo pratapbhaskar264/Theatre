@@ -1,6 +1,7 @@
 package com.bhaskar.theatre.controller;
 
 
+import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.entity.Theatre;
 import com.bhaskar.theatre.service.TheatreService;
@@ -54,7 +55,16 @@ public class TheatreController {
     }
 
 
-
+    @GetMapping("/theater/{theaterId}")
+    public ResponseEntity<ApiResponseDto> getTheaterById(@PathVariable long theaterId){
+        Theatre theater = theatreService.getTheatreById(theaterId);
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .data(theater)
+                        .message("Fetched theater by id: " + theater.getId())
+                        .build()
+        );
+    }
 
 
 
