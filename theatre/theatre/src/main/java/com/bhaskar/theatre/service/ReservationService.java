@@ -3,13 +3,24 @@ package com.bhaskar.theatre.service;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.dto.ReservationRequestDto;
 import com.bhaskar.theatre.entity.Reservation;
+import com.bhaskar.theatre.entity.Seat;
+import com.bhaskar.theatre.enums.ReservationStatus;
+import com.bhaskar.theatre.exception.SeatAlreadyBookedException;
+import com.bhaskar.theatre.exception.ShowNotFoundException;
 import com.bhaskar.theatre.repository.ReservationRepository;
+import com.bhaskar.theatre.repository.ShowRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Pageable;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static com.bhaskar.theatre.constant.ExceptionMessages.SEAT_ALREADY_BOOKED;
+import static com.bhaskar.theatre.constant.ExceptionMessages.SHOW_NOT_FOUND;
 
 @Service
 public class ReservationService {
