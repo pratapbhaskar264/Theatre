@@ -2,13 +2,12 @@ package com.bhaskar.theatre.controller;
 
 import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.UserResponseDto;
+import com.bhaskar.theatre.enums.Role;
 import com.bhaskar.theatre.exception.UsernameNotFoundException;
 import com.bhaskar.theatre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -63,6 +62,26 @@ public class UserController {
                         .message("Fetched all users")
                         .build()
         );
+    }
+
+    @Secured({"ROLE_SUPER_ADMIN"})
+    @PostMapping("/user/promote/{username}")
+    public ResponseEntity<UserResponseDto> promoteUserToAdmin(@PathVariable String username) {
+        return userRepository.findByUsername(username)
+                .map(userInDb -> {
+                    userInDb.setRole(Role.ROLE_ADMIN);
+                    return userRepository.save(userInDb);
+                })
+                .map(updatedUser -> ResponseEntity.ok(UserResponseDto.builder()
+                        .email(updatedUser.getEmail())
+                        .firstName(updatedUser.getFirstName())
+                        .lastName(updatedUser.getLastName())
+                        .role(updatedUser.getRole())
+                        .username(updatedUser.getUsername())
+                        .id(updatedUser.getId())
+                        .build())
+                )
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 
 
