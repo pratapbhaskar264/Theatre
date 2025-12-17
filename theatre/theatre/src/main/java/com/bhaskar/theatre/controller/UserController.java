@@ -1,6 +1,7 @@
 package com.bhaskar.theatre.controller;
 
 import com.bhaskar.theatre.dto.ApiResponseDto;
+import com.bhaskar.theatre.dto.UserRequestDto;
 import com.bhaskar.theatre.dto.UserResponseDto;
 import com.bhaskar.theatre.entity.User;
 import com.bhaskar.theatre.enums.Role;
@@ -88,7 +89,7 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserResponseDto request) {
+    public ResponseEntity<UserResponseDto> createUser( @RequestBody UserRequestDto request) {
 
         if (userRepository.findByUsername(request.getUsername())) {
             throw new UserExistsException(USER_EXISTS);
