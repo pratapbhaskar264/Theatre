@@ -1,4 +1,10 @@
 package com.bhaskar.theatre.exception;
 
-public class AmountNotMatchException {
+import org.springframework.http.HttpStatus;
+
+public class AmountNotMatchException extends CustomException{
+
+    public AmountNotMatchException(String message, HttpStatus httpStatus) {
+        super(message, httpStatus);
+    }
 }
