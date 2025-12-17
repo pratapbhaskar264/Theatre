@@ -2,7 +2,9 @@ package com.bhaskar.theatre.controller;
 
 import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.UserResponseDto;
+import com.bhaskar.theatre.entity.User;
 import com.bhaskar.theatre.enums.Role;
+import com.bhaskar.theatre.exception.UserExistsException;
 import com.bhaskar.theatre.exception.UsernameNotFoundException;
 import com.bhaskar.theatre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.bhaskar.theatre.constant.ExceptionMessages.USER_EXISTS;
 import static com.bhaskar.theatre.constant.ExceptionMessages.USER_NOT_FOUND;
 
 @RestController
@@ -83,6 +86,37 @@ public class UserController {
                 )
                 .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
+
+    @PostMapping("/user")
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserResponseDto request) {
+
+        if (userRepository.findByUsername(request.getUsername())) {
+            throw new UserExistsException(USER_EXISTS);
+        }
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.ROLE_USER)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        return ResponseEntity.ok(
+                UserResponseDto.builder()
+                        .id(savedUser.getId())
+                        .username(savedUser.getUsername())
+                        .email(savedUser.getEmail())
+                        .firstName(savedUser.getFirstName())
+                        .lastName(savedUser.getLastName())
+                        .role(savedUser.getRole())
+                        .build()
+        );
+    }
+
 
 
 
