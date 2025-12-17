@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -47,9 +48,9 @@ public class ShowService {
         if(theaterId == null && movieId == null){
             return showRepository.findAll(pageRequest);
         } else if(theaterId == null){
-            return showRepository.findByMovieId(movieId, pageRequest);
+            return showRepository.findByMovieId(movieId, (Pageable) pageRequest);
         }
-        return showRepository.findByTheaterIdAndMovieId(theaterId, movieId, pageRequest);
+        return showRepository.findByTheaterIdAndMovieId(theaterId, movieId, (Pageable) pageRequest);
     }
 
     public Show updateShowMovie(long showId, long movieId) {
