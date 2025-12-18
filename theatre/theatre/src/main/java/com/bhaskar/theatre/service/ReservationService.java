@@ -134,7 +134,11 @@ public class ReservationService {
                 })
                 .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
+    public Reservation getReservationById(long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
 
+    }
     public Reservation cancelReservation(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .map(reservationIdb -> {
@@ -154,5 +158,6 @@ public class ReservationService {
 
 
     }
+
 
 }

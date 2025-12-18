@@ -65,6 +65,16 @@ public class ReservationController {
                 );
     }
 
+    @GetMapping("/reservation/{reservationId}")
+    public ResponseEntity<ApiResponseDto> getReservationById(@PathVariable long reservationId){
+        Reservation reservation = reservationService.getReservationById(reservationId);
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .message("Reservation Fetched with id: " + reservation.getId())
+                        .data(reservation)
+                        .build()
+        );
+    }
     @PostMapping("/cancel/{reservationId}")
     public ResponseEntity<ApiResponseDto> cancelReservation(@PathVariable long reservationId){
         Reservation reservation = reservationService.cancelReservation(reservationId);
