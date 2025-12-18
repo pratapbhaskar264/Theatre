@@ -160,42 +160,42 @@ public class ReservationService {
 
 
     }
-    public PagedApiResponseDto filterReservations(
-            Long theaterId,
-            Long movieId,
-            Long userId,
-            String reservationStatus,
-            String createdDate,
-            int page,
-            int size
-    ) {
-
-        ReservationStatus status = ReservationStatus.valueOf(reservationStatus);
-
-        Specification<Reservation> specification =
-                Specification.where(ReservationSpecification.hasTheaterId(theaterId))
-                        .and(ReservationSpecification.hasMovieId(movieId))
-                        .and(ReservationSpecification.hasUserId(userId))
-                        .and(ReservationSpecification.hasStatus(status))
-                        .and(ReservationSpecification.createdOn(createdDate));
-
-        Pageable pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by("createdAt").descending()
-        );
-
-        Page<Reservation> reservationPage =
-                reservationRepository.findAll(specification, pageable);
-
-        return PagedApiResponseDto.builder()
-                .content(reservationPage.getContent())
-                .pageNumber(reservationPage.getNumber())
-                .pageSize(reservationPage.getSize())
-                .totalElements(reservationPage.getTotalElements())
-                .totalPages(reservationPage.getTotalPages())
-                .isLast(reservationPage.isLast())
-                .build();
-    }
+//    public PagedApiResponseDto filterReservations(
+//            Long theaterId,
+//            Long movieId,
+//            Long userId,
+//            String reservationStatus,
+//            String createdDate,
+//            int page,
+//            int size
+//    ) {
+//
+//        ReservationStatus status = ReservationStatus.valueOf(reservationStatus);
+//
+//        Specification<Reservation> specification =
+//                Specification.where(ReservationSpecification.hasTheaterId(theaterId))
+//                        .and(ReservationSpecification.hasMovieId(movieId))
+//                        .and(ReservationSpecification.hasUserId(userId))
+//                        .and(ReservationSpecification.hasStatus(status))
+//                        .and(ReservationSpecification.createdOn(createdDate));
+//
+//        Pageable pageable = PageRequest.of(
+//                page,
+//                size,
+//                Sort.by("createdAt").descending()
+//        );
+//
+//        Page<Reservation> reservationPage =
+//                reservationRepository.findAll(specification, pageable);
+//
+//        return PagedApiResponseDto.builder()
+//                .content(reservationPage.getContent())
+//                .pageNumber(reservationPage.getNumber())
+//                .pageSize(reservationPage.getSize())
+//                .totalElements(reservationPage.getTotalElements())
+//                .totalPages(reservationPage.getTotalPages())
+//                .isLast(reservationPage.isLast())
+//                .build();
+//    }
 
 }

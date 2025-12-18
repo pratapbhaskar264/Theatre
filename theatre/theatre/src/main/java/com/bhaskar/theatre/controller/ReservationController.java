@@ -44,18 +44,20 @@ public class ReservationController {
             @RequestParam(required = false) String createdDate
     ){
 
-        return ResponseEntity.ok(
-                reservationService.filterReservations(
-                        theaterId,
-                        movieId,
-                        userId,
-                        reservationStatus,
-                        createdDate,
-                        page,
-                        size
-                )
-        );
+//        return ResponseEntity.ok(
+//                reservationService.filterReservations(
+//                        theaterId,
+//                        movieId,
+//                        userId,
+//                        reservationStatus,
+//                        createdDate,
+//                        page,
+//                        size
+//                )
+//        );
+        return null;
     }
+
 
 
     @PostMapping("/reserve")
