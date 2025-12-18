@@ -6,10 +6,7 @@ import com.bhaskar.theatre.entity.Reservation;
 import com.bhaskar.theatre.entity.Seat;
 import com.bhaskar.theatre.enums.ReservationStatus;
 import com.bhaskar.theatre.enums.SeatStatus;
-import com.bhaskar.theatre.exception.AmountNotMatchException;
-import com.bhaskar.theatre.exception.SeatAlreadyBookedException;
-import com.bhaskar.theatre.exception.SeatLockAccquiredException;
-import com.bhaskar.theatre.exception.ShowNotFoundException;
+import com.bhaskar.theatre.exception.*;
 import com.bhaskar.theatre.repository.ReservationRepository;
 import com.bhaskar.theatre.repository.SeatRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
@@ -137,4 +134,25 @@ public class ReservationService {
                 })
                 .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
+
+    public Reservation cancelReservation(long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .map(reservationIdb -> {
+                    if (LocalDateTime.now().isAfter(reservationIdb.getShow().getStartTime()))
+                        throw new ShowStartedException(SHOW_STARTED_EXCEPTION, HttpStatus.BAD_REQUEST);
+
+                    reservationIdb.getSeatsReserved()
+                            .forEach(seat -> {
+                                seat.setStatus(SeatStatus.UNBOOKED);
+                                seatRepository.save(seat);
+                            });
+
+                    reservationIdb.setReservationStatus(ReservationStatus.CANCELED);
+                    return reservationRepository.save(reservationIdb);
+                })
+                .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+
+    }
+
 }

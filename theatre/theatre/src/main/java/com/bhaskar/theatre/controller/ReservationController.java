@@ -65,6 +65,17 @@ public class ReservationController {
                 );
     }
 
+    @PostMapping("/cancel/{reservationId}")
+    public ResponseEntity<ApiResponseDto> cancelReservation(@PathVariable long reservationId){
+        Reservation reservation = reservationService.cancelReservation(reservationId);
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .message("Reservation Canceled")
+                        .data(reservation)
+                        .build()
+        );
+    }
+
 
 
 }
