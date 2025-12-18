@@ -13,7 +13,7 @@ public class ExceptionMessages {
             "Paying amount is not matching with the amount to be paid";
     public static final String SEAT_ALREADY_BOOKED =
             "Seats are already booked";
-    public static final String SEAT_LOCK_ACQUIRED =
+    public static final String SEAT_LOCK_ACCQUIRED =
             "Seat is getting booked by another user";
     public static final String SHOW_STARTED_EXCEPTION =
             "Show is already started";
