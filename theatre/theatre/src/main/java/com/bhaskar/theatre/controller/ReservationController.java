@@ -44,7 +44,17 @@ public class ReservationController {
             @RequestParam(required = false) String createdDate
     ){
 
-        return null;
+        return ResponseEntity.ok(
+                reservationService.filterReservations(
+                        theaterId,
+                        movieId,
+                        userId,
+                        reservationStatus,
+                        createdDate,
+                        page,
+                        size
+                )
+        );
     }
 
 
