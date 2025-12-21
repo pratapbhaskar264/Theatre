@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import static com.bhaskar.theatre.constant.ExceptionMessages.USER_NOT_FOUND;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserController(UserRepository userRepository) {
@@ -93,9 +95,10 @@ public class UserController {
     @PostMapping("/user")
     public ResponseEntity<UserResponseDto> createUser( @RequestBody UserRequestDto request) {
 
-        if (userRepository.findByUsername(request.getUsername())) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new UserExistsException(USER_EXISTS);
         }
+
 
         User user = User.builder()
                 .username(request.getUsername())
