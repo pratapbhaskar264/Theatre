@@ -4,6 +4,7 @@ import com.bhaskar.theatre.entity.User;
 import com.bhaskar.theatre.enums.Role;
 import com.bhaskar.theatre.repository.UserRepository;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component

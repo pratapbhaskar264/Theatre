@@ -10,6 +10,8 @@ import com.bhaskar.theatre.exception.UsernameNotFoundException;
 import com.bhaskar.theatre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
