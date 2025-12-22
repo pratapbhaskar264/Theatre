@@ -3,16 +3,19 @@ package com.bhaskar.theatre.seeder;
 import com.bhaskar.theatre.entity.User;
 import com.bhaskar.theatre.enums.Role;
 import com.bhaskar.theatre.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SuperAdminSeeder {
+public class SuperAdminSeeder  implements ApplicationListener<ContextRefreshedEvent> {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
     public SuperAdminSeeder(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
