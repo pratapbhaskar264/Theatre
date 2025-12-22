@@ -5,10 +5,11 @@ import com.bhaskar.theatre.dto.UserResponseDto;
 import com.bhaskar.theatre.enums.Role;
 import com.bhaskar.theatre.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.context.SecurityContextHolder;
-import com.bhaskar.theatre.exception.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class UserController {
                         .id(user.getId())
                         .build())
                 )
-                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND , HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 
 
@@ -86,7 +87,7 @@ public class UserController {
                         .id(updatedUser.getId())
                         .build())
                 )
-                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND , HttpStatus.CONFLICT));
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 
 //    @PostMapping("/user")
