@@ -3,7 +3,7 @@ package com.bhaskar.theatre.enums;
 public enum MovieGenre {
     ACTION,
     THRILLER,
-    HORRER,
+    HORROR,
     COMEDY,
     SUSPENSE,
     DRAMA,
