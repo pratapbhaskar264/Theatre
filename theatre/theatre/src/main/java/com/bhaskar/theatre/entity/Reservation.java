@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -30,13 +30,12 @@ public class Reservation {
 
     @OneToMany(fetch = FetchType.EAGER)
     private List<Seat> seatsReserved;
-
     private double amountPaid;
 
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus reservationStatus;
 
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
 
 }

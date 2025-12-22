@@ -25,11 +25,6 @@ public class Movie {
 
     @Enumerated(value = EnumType.STRING)
     List<MovieGenre> genre;
-
-//    @ElementCollection
-//    @Enumerated(EnumType.STRING)
-//    List<MovieGenre> genre;
-
     int movieLength;
     String movieLanguage;
     LocalDate releaseDate;

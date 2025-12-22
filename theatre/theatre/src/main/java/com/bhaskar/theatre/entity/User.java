@@ -13,53 +13,28 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
-@Table(name = "users")
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
+@Entity
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
-
+    private long id;
+    private String firstName;
+    private String lastName;
     private String username;
     private String email;
 
-    @Column(nullable = false)
-    private String password;
-
-    private String firstName;
-    private String lastName;
-    private String country;
-
-    @Enumerated(EnumType.STRING)
+    @Enumerated(value = EnumType.STRING)
     private Role role;
+    private String password;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 }
