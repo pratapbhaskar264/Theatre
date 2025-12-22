@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_SUPER_ADMIN')")
 @RestController
 @RequestMapping("/api/v1/movies")
 public class MovieController {
@@ -26,8 +26,10 @@ public class MovieController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<PagedApiResponseDto> getAllMovies( @RequestParam(defaultValue = "0") int page,
-                                                             @RequestParam(defaultValue = "10") int pageSize) {
+    public ResponseEntity<PagedApiResponseDto> getAllMovies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize
+    ){
         Page<Movie> moviePage = movieService.getAllMovies(page, pageSize);
         List<Movie> movies = moviePage.getContent();
         return ResponseEntity.ok(
@@ -42,7 +44,6 @@ public class MovieController {
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<ApiResponseDto> getMovieById(@PathVariable long movieId){
         Movie movie = movieService.getMovieById(movieId);
-
         return ResponseEntity.ok(
                 ApiResponseDto.builder()
                         .message("Fetched movie with id: " + movieId)
@@ -76,6 +77,7 @@ public class MovieController {
                                 .build()
                 );
     }
+
 
     @DeleteMapping("/movie/delete/{movieId}")
     public ResponseEntity<?> deleteMovieById(@PathVariable long movieId){

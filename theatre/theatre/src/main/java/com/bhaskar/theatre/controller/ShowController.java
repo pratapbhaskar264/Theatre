@@ -6,11 +6,14 @@ import com.bhaskar.theatre.dto.ShowRequestDto;
 import com.bhaskar.theatre.dto.ShowTimingUpdateDto;
 import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.service.ShowService;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -59,6 +62,7 @@ public class ShowController {
         );
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @GetMapping("/show/{showId}")
     public ResponseEntity<ApiResponseDto> getShowById(@PathVariable long showId){
         Show show = showService.getShowById(showId);
@@ -70,6 +74,7 @@ public class ShowController {
         );
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @PostMapping("/show/create")
     public ResponseEntity<ApiResponseDto> createShow(@RequestBody ShowRequestDto showRequestDto){
         Show show = showService.createNewShow(showRequestDto);
@@ -82,7 +87,7 @@ public class ShowController {
                                 .build()
                 );
     }
-
+    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @PatchMapping("/show/update/movie/{showId}")
     public ResponseEntity<ApiResponseDto> updateMovie(
             @PathVariable long showId,
@@ -98,7 +103,7 @@ public class ShowController {
         );
     }
 
-
+    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @PatchMapping("/show/update/theatre/{showId}")
     public ResponseEntity<ApiResponseDto> updateTheatre(
             @PathVariable long showId,
@@ -114,7 +119,7 @@ public class ShowController {
         );
     }
 
-
+    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @PatchMapping("/show/update/timings/{showId}")
     public ResponseEntity<ApiResponseDto> updateShowTimings(
             @PathVariable long showId,
@@ -134,6 +139,7 @@ public class ShowController {
         );
     }
 
+    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @DeleteMapping("/show/delete/{showId}")
     public ResponseEntity<?> deleteShowById(@PathVariable long showId){
         showService.deleteShowById(showId);

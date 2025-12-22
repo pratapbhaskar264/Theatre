@@ -6,7 +6,6 @@ import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.dto.ReservationRequestDto;
 import com.bhaskar.theatre.entity.Reservation;
 import com.bhaskar.theatre.service.ReservationService;
-import jakarta.persistence.GeneratedValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,17 +45,7 @@ public class ReservationController {
             @RequestParam(required = false) String createdDate
     ){
 
-//        return ResponseEntity.ok(
-//                reservationService.filterReservations(
-//                        theaterId,
-//                        movieId,
-//                        userId,
-//                        reservationStatus,
-//                        createdDate,
-//                        page,
-//                        size
-//                )
-//        );
+
         return null;
     }
 
