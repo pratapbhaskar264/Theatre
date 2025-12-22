@@ -1,6 +1,5 @@
 package com.bhaskar.theatre.config;
 
-//package com.bhaskar.theatre.config;
 
 import com.bhaskar.theatre.repository.UserRepository;
 import com.bhaskar.theatre.service.JwtService;
