@@ -10,7 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SuperAdminSeeder  implements ApplicationListener<ContextRefreshedEvent> {
+public class SuperAdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -20,6 +20,7 @@ public class SuperAdminSeeder  implements ApplicationListener<ContextRefreshedEv
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
+
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -40,4 +41,5 @@ public class SuperAdminSeeder  implements ApplicationListener<ContextRefreshedEv
             userRepository.save(superAdmin);
         }
     }
+
 }
