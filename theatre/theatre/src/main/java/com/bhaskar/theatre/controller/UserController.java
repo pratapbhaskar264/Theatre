@@ -48,7 +48,7 @@ public class UserController {
                         .id(user.getId())
                         .build())
                 )
-                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND , HttpStatus.NOT_FOUND));
     }
 
 
@@ -92,7 +92,7 @@ public class UserController {
                         .id(updatedUser.getId())
                         .build())
                 )
-                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND , HttpStatus.CONFLICT));
     }
 
     @PostMapping("/user")
