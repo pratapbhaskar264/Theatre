@@ -1,5 +1,8 @@
 package com.bhaskar.theatre.service;
 
+import org.springframework.data.domain.Pageable;
+
+
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.dto.ReservationRequestDto;
 import com.bhaskar.theatre.entity.Reservation;
@@ -64,7 +67,7 @@ public class ReservationService {
         );
 
         Page<Reservation> reservationPage =
-                reservationRepository.findByUserUsername(username, pageable);
+                reservationRepository.findByUserUsername(username, (java.awt.print.Pageable) pageable);
 
         // 4️⃣ Build paged response DTO
         return PagedApiResponseDto.builder()
