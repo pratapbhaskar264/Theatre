@@ -9,16 +9,16 @@ import com.bhaskar.theatre.exception.TheatreNotFoundException;
 import com.bhaskar.theatre.repository.MovieRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.TheatreRespository;
-import jakarta.transaction.Transactional;
+//import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
+//import java.awt.print.Pageable;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+//import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,57 +48,57 @@ public class ShowService {
         if(theaterId == null && movieId == null){
             return showRepository.findAll(pageRequest);
         } else if(theaterId == null){
-            return showRepository.findByMovieId(movieId, (Pageable) pageRequest);
+            return showRepository.findByMovieId(movieId,  pageRequest);
         }
-        return showRepository.findByTheaterIdAndMovieId(theaterId, movieId, (Pageable) pageRequest);
+        return showRepository.findByTheaterIdAndMovieId(theaterId, movieId,  pageRequest);
     }
 
-    public Show updateShowMovie(long showId, long movieId) {
+//    public Show updateShowMovie(long showId, long movieId) {
+//
+//        Show show = showRepository.findById(showId)
+//                .orElseThrow(() ->
+//                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
+//                );
+//
+//        show.setMovie(
+//                movieRepository.findById(movieId)
+//                        .orElseThrow(() ->
+//                                new RuntimeException("Movie not found")
+//                        )
+//        );
+//
+//        return showRepository.save(show);
+//    }
 
-        Show show = showRepository.findById(showId)
-                .orElseThrow(() ->
-                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
-                );
+//    public Show updateShowTheatre(long showId, long theatreId) {
+//
+//        Show show = showRepository.findById(showId)
+//                .orElseThrow(() ->
+//                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
+//                );
+//
+//        show.setTheatre(
+//                theatreRepository.findById(theatreId)
+//                        .orElseThrow(() ->
+//                                new RuntimeException("Theatre not found")
+//                        )
+//        );
+//
+//        return showRepository.save(show);
+//    }
 
-        show.setMovie(
-                movieRepository.findById(movieId)
-                        .orElseThrow(() ->
-                                new RuntimeException("Movie not found")
-                        )
-        );
-
-        return showRepository.save(show);
-    }
-
-    public Show updateShowTheatre(long showId, long theatreId) {
-
-        Show show = showRepository.findById(showId)
-                .orElseThrow(() ->
-                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
-                );
-
-        show.setTheatre(
-                theatreRepository.findById(theatreId)
-                        .orElseThrow(() ->
-                                new RuntimeException("Theatre not found")
-                        )
-        );
-
-        return showRepository.save(show);
-    }
-
-    public Show updateShowTimings(long showId, LocalTime startTime, LocalTime endTime) {
-
-        Show show = showRepository.findById(showId)
-                .orElseThrow(() ->
-                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
-                );
-
-        show.setStartTime(startTime);
-        show.setEndTime(endTime);
-
-        return showRepository.save(show);
-    }
+//    public Show updateShowTimings(long showId, LocalTime startTime, LocalTime endTime) {
+//
+//        Show show = showRepository.findById(showId)
+//                .orElseThrow(() ->
+//                        new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND)
+//                );
+//
+//        show.setStartTime(startTime);
+//        show.setEndTime(endTime);
+//
+//        return showRepository.save(show);
+//    }
 
 
 
@@ -111,7 +111,7 @@ public class ShowService {
         showRepository.deleteById(showId);
     }
 
-    @Transactional
+//    @Transactional
     public Show createNewShow(ShowRequestDto showRequestDto) {
         return movieRepository.findById(showRequestDto.getMovieId())
                 .map(movie -> theatreRepository.findById(showRequestDto.getTheaterId())

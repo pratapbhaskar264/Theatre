@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Service
 public class SeatService {
@@ -18,16 +19,19 @@ public class SeatService {
         this.seatRepository = seatRepository;
     }
 
-    public List<Seat> createSeatsWithGivenPrice(int seats, double price, String area) {
-        return IntStream.range(1, seats + 1)
-                .mapToObj(seatCount -> Seat.builder()
+    public List<Seat> createSeatsWithGivenPrice(int seats, double price, String area){
+        List<Seat> seatsToSave = IntStream.rangeClosed(1, seats)
+                .mapToObj(i -> Seat.builder()
                         .price(price)
-                        .number(seatCount)
+                        .number(i)
                         .area(area)
                         .status(SeatStatus.UNBOOKED)
                         .build()
                 )
-                .map(seatRepository::save)
                 .toList();
+
+        // 2. Perform a single batch save
+        return seatRepository.saveAll(seatsToSave);
     }
+
 }

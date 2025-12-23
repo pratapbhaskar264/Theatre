@@ -1,9 +1,7 @@
 package com.bhaskar.theatre.service;
 
-import org.springframework.data.domain.Pageable;
 
 
-import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.dto.ReservationRequestDto;
 import com.bhaskar.theatre.entity.Reservation;
 import com.bhaskar.theatre.entity.Seat;
@@ -14,20 +12,14 @@ import com.bhaskar.theatre.repository.ReservationRepository;
 import com.bhaskar.theatre.repository.SeatRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.UserRepository;
-import com.bhaskar.theatre.specification.ReservationSpecification;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.bhaskar.theatre.constant.ExceptionMessages.*;
@@ -53,32 +45,32 @@ public class ReservationService {
         this.showRepository = showRepository;
         this.userRepository = userRepository;
     }
-
-
-    public PagedApiResponseDto getAllReservationsForCurrentUser(int page, int size) {
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-        Pageable pageable = (Pageable) PageRequest.of(
-                page,
-                size,
-                Sort.by("createdAt").descending()
-        );
-
-        Page<Reservation> reservationPage =
-                reservationRepository.findByUserUsername(username, (java.awt.print.Pageable) pageable);
-
-        // 4️⃣ Build paged response DTO
-        return PagedApiResponseDto.builder()
-                .content(reservationPage.getContent())
-                .pageNumber(reservationPage.getNumber())
-                .pageSize(reservationPage.getSize())
-                .totalElements(reservationPage.getTotalElements())
-                .totalPages(reservationPage.getTotalPages())
-                .isLast(reservationPage.isLast())
-                .build();
-    }
+//
+//
+//    public PagedApiResponseDto getAllReservationsForCurrentUser(int page, int size) {
+//        String username = SecurityContextHolder
+//                .getContext()
+//                .getAuthentication()
+//                .getName();
+//        Pageable pageable = (Pageable) PageRequest.of(
+//                page,
+//                size,
+//                Sort.by("createdAt").descending()
+//        );
+//
+//        Page<Reservation> reservationPage =
+//                reservationRepository.findByUserUsername(username, (java.awt.print.Pageable) pageable);
+//
+//        // 4️⃣ Build paged response DTO
+//        return PagedApiResponseDto.builder()
+//                .content(reservationPage.getContent())
+//                .pageNumber(reservationPage.getNumber())
+//                .pageSize(reservationPage.getSize())
+//                .totalElements(reservationPage.getTotalElements())
+//                .totalPages(reservationPage.getTotalPages())
+//                .isLast(reservationPage.isLast())
+//                .build();
+//    }
 
     @Transactional
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
@@ -140,6 +132,7 @@ public class ReservationService {
                 })
                 .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
+
     public Reservation getReservationById(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));

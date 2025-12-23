@@ -87,57 +87,57 @@ public class ShowController {
                                 .build()
                 );
     }
-    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
-    @PatchMapping("/show/update/movie/{showId}")
-    public ResponseEntity<ApiResponseDto> updateMovie(
-            @PathVariable long showId,
-            @RequestParam long movieId
-    ) {
-        Show updatedShow = showService.updateShowMovie(showId, movieId);
+//    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
+//    @PatchMapping("/show/update/movie/{showId}")
+//    public ResponseEntity<ApiResponseDto> updateMovie(
+//            @PathVariable long showId,
+//            @RequestParam long movieId
+//    ) {
+//        Show updatedShow = showService.updateShowMovie(showId, movieId);
+//
+//        return ResponseEntity.ok(
+//                ApiResponseDto.builder()
+//                        .data(updatedShow)
+//                        .message("Movie updated for show " + showId)
+//                        .build()
+//        );
+//    }
 
-        return ResponseEntity.ok(
-                ApiResponseDto.builder()
-                        .data(updatedShow)
-                        .message("Movie updated for show " + showId)
-                        .build()
-        );
-    }
+//    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
+//    @PatchMapping("/show/update/theatre/{showId}")
+//    public ResponseEntity<ApiResponseDto> updateTheatre(
+//            @PathVariable long showId,
+//            @RequestParam long theatreId
+//    ) {
+//        Show updatedShow = showService.updateShowTheatre(showId, theatreId);
+//
+//        return ResponseEntity.ok(
+//                ApiResponseDto.builder()
+//                        .data(updatedShow)
+//                        .message("Theatre updated for show " + showId)
+//                        .build()
+//        );
+//    }
 
-    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
-    @PatchMapping("/show/update/theatre/{showId}")
-    public ResponseEntity<ApiResponseDto> updateTheatre(
-            @PathVariable long showId,
-            @RequestParam long theatreId
-    ) {
-        Show updatedShow = showService.updateShowTheatre(showId, theatreId);
-
-        return ResponseEntity.ok(
-                ApiResponseDto.builder()
-                        .data(updatedShow)
-                        .message("Theatre updated for show " + showId)
-                        .build()
-        );
-    }
-
-    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
-    @PatchMapping("/show/update/timings/{showId}")
-    public ResponseEntity<ApiResponseDto> updateShowTimings(
-            @PathVariable long showId,
-            @RequestBody ShowTimingUpdateDto timingDto
-    ) {
-        Show updatedShow = showService.updateShowTimings(
-                showId,
-                timingDto.getStartTime(),
-                timingDto.getEndTime()
-        );
-
-        return ResponseEntity.ok(
-                ApiResponseDto.builder()
-                        .data(updatedShow)
-                        .message("Show timings updated for show " + showId)
-                        .build()
-        );
-    }
+//    @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
+//    @PatchMapping("/show/update/timings/{showId}")
+//    public ResponseEntity<ApiResponseDto> updateShowTimings(
+//            @PathVariable long showId,
+//            @RequestBody ShowTimingUpdateDto timingDto
+//    ) {
+//        Show updatedShow = showService.updateShowTimings(
+//                showId,
+//                timingDto.getStartTime(),
+//                timingDto.getEndTime()
+//        );
+//
+//        return ResponseEntity.ok(
+//                ApiResponseDto.builder()
+//                        .data(updatedShow)
+//                        .message("Show timings updated for show " + showId)
+//                        .build()
+//        );
+//    }
 
     @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @DeleteMapping("/show/delete/{showId}")

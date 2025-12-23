@@ -4,7 +4,6 @@ import com.bhaskar.theatre.dto.MovieRequestDto;
 import com.bhaskar.theatre.entity.Movie;
 import com.bhaskar.theatre.enums.MovieGenre;
 import com.bhaskar.theatre.exception.MovieNotFoundException;
-import com.bhaskar.theatre.constant.ExceptionMessages;
 import com.bhaskar.theatre.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
