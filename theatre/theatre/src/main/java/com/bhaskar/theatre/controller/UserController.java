@@ -24,7 +24,7 @@ public class UserController {
 //    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserController(UserRepository userRepository,
+    public UserController(UserRepository userRepository
                           ) {
         this.userRepository = userRepository;
 //        this.passwordEncoder = passwordEncoder;
