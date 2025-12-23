@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
 
 import static com.bhaskar.theatre.constant.ExceptionMessages.THEATRE_NOT_FOUND;
 
@@ -20,6 +19,7 @@ public class TheatreService {
 
         private final TheatreRespository theatreRepository;
 
+        @Autowired
     public TheatreService(TheatreRespository theatreRepository) {
         this.theatreRepository = theatreRepository;
     }
