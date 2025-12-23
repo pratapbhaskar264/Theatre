@@ -50,7 +50,7 @@ public class ShowService {
         } else if(theaterId == null){
             return showRepository.findByMovieId(movieId,  pageRequest);
         }
-        return showRepository.findByTheaterIdAndMovieId(theaterId, movieId,  pageRequest);
+        return showRepository.findByTheatreIdAndMovieId(theaterId, movieId,  pageRequest);
     }
 
 //    public Show updateShowMovie(long showId, long movieId) {
@@ -112,33 +112,32 @@ public class ShowService {
     }
 
 //    @Transactional
-    public Show createNewShow(ShowRequestDto showRequestDto) {
-        return movieRepository.findById(showRequestDto.getMovieId())
-                .map(movie -> theatreRepository.findById(showRequestDto.getTheaterId())
-                        .map(theater -> {
-                            List<Seat> seats = new ArrayList<>();
-                            showRequestDto.getSeats()
-                                    .forEach(seatStructure ->
-                                            seats.addAll(
-                                                    seatService.createSeatsWithGivenPrice(
-                                                            seatStructure.getSeatCount(),
-                                                            seatStructure.getSeatPrice(),
-                                                            seatStructure.getArea()
-                                                    )
-                                            )
-                                    );
+public Show createNewShow(ShowRequestDto showRequestDto) {
+    return movieRepository.findById(showRequestDto.getMovieId())
+            .map(movie -> theatreRepository.findById(showRequestDto.getTheatreId()) // Changed to theatre
+                    .map(theatre -> { // Changed to theatre
+                        List<Seat> seats = new ArrayList<>();
+                        showRequestDto.getSeats()
+                                .forEach(seatStructure ->
+                                        seats.addAll(
+                                                seatService.createSeatsWithGivenPrice(
+                                                        seatStructure.getSeatCount(),
+                                                        seatStructure.getSeatPrice(),
+                                                        seatStructure.getArea()
+                                                )
+                                        )
+                                );
 
-                            Show show = Show.builder()
-                                    .movie(movie)
-                                    .theater(theater)
-                                    .startTime(LocalDateTime.parse(showRequestDto.getStartTime()))
-                                    .endTime(LocalDateTime.parse(showRequestDto.getEndTime()))
-                                    .seats(seats)
-                                    .build();
-                            return showRepository.save(show);
-                        })
-                        .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.BAD_REQUEST)))
-                .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.BAD_REQUEST));
-    }
-
+                        Show show = Show.builder()
+                                .movie(movie)
+                                .theatre(theatre) // Changed to theatre
+                                .startTime(LocalDateTime.parse(showRequestDto.getStartTime()))
+                                .endTime(LocalDateTime.parse(showRequestDto.getEndTime()))
+                                .seats(seats)
+                                .build();
+                        return showRepository.save(show);
+                    })
+                    .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.BAD_REQUEST))) // Changed to Theatre
+            .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.BAD_REQUEST));
+}
 }

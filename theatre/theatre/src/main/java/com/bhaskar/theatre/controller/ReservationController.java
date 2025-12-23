@@ -29,12 +29,8 @@ public class ReservationController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        PagedApiResponseDto response =
-                reservationService.getAllReservationsForCurrentUser(page, size);
-
-        return ResponseEntity.ok(response);
+        return null;
     }
-
     @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @GetMapping("/filter")
     public ResponseEntity<PagedApiResponseDto> filterReservations(

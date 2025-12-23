@@ -79,7 +79,7 @@ public class ReservationService {
                 .findById(reservationRequestDto.getShowId())
                 .map(show -> {
                     List<Seat> seats = reservationRequestDto
-                            .getSeatIdsToReserve()
+                            .getSeatIdsReserve() // Capital 'S'
                             .stream()
                             .map(seatRepository::findById)
                             .map(Optional::get)
