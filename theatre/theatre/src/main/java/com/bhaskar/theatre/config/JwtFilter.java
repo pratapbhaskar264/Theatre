@@ -1,6 +1,5 @@
 package com.bhaskar.theatre.config;
 
-
 import com.bhaskar.theatre.repository.UserRepository;
 import com.bhaskar.theatre.service.JwtService;
 import jakarta.servlet.FilterChain;
@@ -36,22 +35,30 @@ public class JwtFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
-            String token = authHeader.substring(7);
-            String username = jwtService.extractUsername(token);
-            if(username == null){
-                filterChain.doFilter(request, response);
-                return;
-            }
-            userRepository.findByUsername(username)
-                    .ifPresent(user -> {
-                        UsernamePasswordAuthenticationToken authToken =
-                                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                    });
 
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        String token = authHeader.substring(7);
+        String username = jwtService.extractUsername(token);
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            userRepository.findByUsername(username).ifPresent(user -> {
+                // FIX: Pass user.getUsername() instead of the full user object
+                // This allows your Controller to cast it to a String safely
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        user.getUsername(), // Principal is now a String
+                        null,
+                        user.getAuthorities() // Still includes roles for @Secured
+                );
+
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            });
+        }
+
         filterChain.doFilter(request, response);
     }
 }
