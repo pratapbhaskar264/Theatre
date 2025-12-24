@@ -56,7 +56,7 @@ public class TheatreController {
         );
     }
 
-    @Secured({"ROLE_ADMIN"})
+//    @Secured({"ROLE_ADMIN"})
     @GetMapping("/theatre/{theatreId}")
     public ResponseEntity<ApiResponseDto> getTheatreById(@PathVariable long theatreId){
         Theatre theatre = theatreService.getTheatreById(theatreId);
@@ -68,7 +68,7 @@ public class TheatreController {
         );
     }
 
-    @Secured({"ROLE_ADMIN"})
+//    @Secured({"ROLE_ADMIN"})
     @PostMapping("/theatre/create")
     public ResponseEntity<ApiResponseDto> createTheatre(@RequestBody TheatreRequestDto theatreRequestDto){
         Theatre theatre = theatreService.createNewTheatre(theatreRequestDto);
@@ -82,7 +82,7 @@ public class TheatreController {
                 );
     }
 
-    @Secured({"ROLE_ADMIN"})
+//    @Secured({"ROLE_ADMIN"})
     @PutMapping("/theatre/update/{theatreId}")
     public ResponseEntity<ApiResponseDto> updateTheatreById(@PathVariable long theatreId, @RequestBody TheatreRequestDto theatreRequestDto){
         Theatre updatedTheatre = theatreService.updateTheatreById(theatreId, theatreRequestDto);
@@ -94,7 +94,7 @@ public class TheatreController {
         );
     }
 
-    @Secured({"ROLE_ADMIN"})
+//    @Secured({"ROLE_ADMIN"})
     @DeleteMapping("/theatre/delete/{theatreId}")
     public ResponseEntity<?> deleteTheatreById(@PathVariable long theatreId){
         theatreService.deleteTheatreById(theatreId);
