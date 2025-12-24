@@ -41,7 +41,7 @@ public class AuthService {
                 .lastName(signupRequestDto.getLastName())
                 .password(bCryptPasswordEncoder.encode(signupRequestDto.getPassword()))
                 .email(signupRequestDto.getEmail())
-                .role(Role.ROLE_USER)
+                .role(signupRequestDto.getRole())
                 .build();
 
         User createdUser = userRepository.save(user);
