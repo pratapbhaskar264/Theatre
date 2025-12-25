@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
@@ -44,6 +45,11 @@ public class ReservationService {
         this.seatRepository = seatRepository;
         this.showRepository = showRepository;
         this.userRepository = userRepository;
+        //Annotations like @RestController, @Service, or @Component tell Spring:
+        // "Manage this class for me." By default, Spring's management style is Singleton Scope.
+        // Whether you use constructor injection, field injection
+        // (@Autowired on the variable), or setter injection, the
+        // class remains a singleton because of that top-level annotation.
     }
 //
 //
@@ -74,61 +80,64 @@ public class ReservationService {
 
     @Transactional
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
+        return showRepository.findById(reservationRequestDto.getShowId()).map(show -> {
 
-        return showRepository
-                .findById(reservationRequestDto.getShowId())
-                .map(show -> {
-                    List<Seat> seats = reservationRequestDto
-                            .getSeatIdsReserve() // Capital 'S'
-                            .stream()
-                            .map(seatRepository::findById)
-                            .map(Optional::get)
-                            .toList();
+            List<Seat> seats = reservationRequestDto.getSeatIdsReserve().stream()
+                    .map(seatRepository::findById)
+                    .map(Optional::get)
+                    .toList();
 
-                    Double amountToBePaid = seats.stream().map(Seat::getPrice).reduce(0.0, Double::sum);
+            // 1. Logic checks first (Amount check)
+            Double amountToBePaid = seats.stream().map(Seat::getPrice).reduce(0.0, Double::sum);
+            if(reservationRequestDto.getAmount() != amountToBePaid)
+                throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
 
-                    if(reservationRequestDto.getAmount() != amountToBePaid)
-                        throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
-
-                    seats.forEach(seat -> {
-                        ReentrantLock seatLock = seatLockManager.getLockForSeat(seat.getId());
-                        boolean isLockFree = seatLock.tryLock();
-                        if (!isLockFree){
-                            throw new SeatLockAccquiredException(SEAT_LOCK_ACCQUIRED, HttpStatus.CONFLICT);
-                        }
-                    });
-
-                    boolean anyBookedSeat = seats.stream().map(Seat::getStatus).anyMatch(seatStatus -> seatStatus.equals(SeatStatus.BOOKED));
-
-                    if (anyBookedSeat){
-                        // Remove lock for every seat
-                        seats.forEach(seat -> seatLockManager.removeLockForSeat(seat.getId()));
-                        throw new SeatAlreadyBookedException(SEAT_ALREADY_BOOKED, HttpStatus.BAD_REQUEST);
+            List<Seat> lockedSeats = new ArrayList<>();
+            try {
+                // 2. Acquire Locks
+                for (Seat seat : seats) {
+                    ReentrantLock seatLock = seatLockManager.getLockForSeat(seat.getId());
+                    if (seatLock.tryLock()) {
+                        lockedSeats.add(seat);
+                    } else {
+                        throw new SeatLockAccquiredException(SEAT_LOCK_ACCQUIRED, HttpStatus.CONFLICT);
                     }
+                }
 
-                    // Mark all the seats as booked
-                    List<Seat> bookedSeats = seats.stream().map(seat -> {
-                        seat.setStatus(SeatStatus.BOOKED);
-                        return seatRepository.save(seat);
-                    }).toList();
+                // 3. Double Check Status (Inside the lock!)
+                boolean anyBookedSeat = seats.stream()
+                        .anyMatch(s -> s.getStatus().equals(SeatStatus.BOOKED));
 
+                if (anyBookedSeat) {
+                    throw new SeatAlreadyBookedException(SEAT_ALREADY_BOOKED, HttpStatus.BAD_REQUEST);
+                }
 
-                    // Create the reservation
-                    Reservation reservation = Reservation.builder()
-                            .reservationStatus(ReservationStatus.BOOKED)
-                            .seatsReserved(bookedSeats)
-                            .show(show)
-                            .user(userRepository.findByUsername(currentUserName).get())
-                            .amountPaid(reservationRequestDto.getAmount())
-                            .createdAt(LocalDateTime.now())
-                            .build();
+                // 4. Perform Update
+                seats.forEach(seat -> {
+                    seat.setStatus(SeatStatus.BOOKED);
+                    seatRepository.save(seat);
+                });
 
-                    // Remove lock for every seat
-                    seats.forEach(seat -> seatLockManager.removeLockForSeat(seat.getId()));
+                return reservationRepository.save(Reservation.builder()
+                        .reservationStatus(ReservationStatus.BOOKED)
+                        .seatsReserved(seats)
+                        .show(show)
+                        .user(userRepository.findByUsername(currentUserName).get())
+                        .amountPaid(reservationRequestDto.getAmount())
+                        .createdAt(LocalDateTime.now())
+                        .build());
 
-                    return reservationRepository.save(reservation);
-                })
-                .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
+            } finally {
+                // 5. CRITICAL: This runs NO MATTER WHAT (success or exception)
+                lockedSeats.forEach(seat -> {
+                    ReentrantLock lock = seatLockManager.getLockForSeat(seat.getId());
+                    if (lock.isHeldByCurrentThread()) {
+                        lock.unlock();
+                    }
+                    // Optional: seatLockManager.removeLockForSeat(seat.getId());
+                });
+            }
+        }).orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
 
     public Reservation getReservationById(long reservationId) {
