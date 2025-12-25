@@ -14,4 +14,5 @@ public class ShowRequestDto {
     private String startTime;
     private String endTime;
     private List<SeatStructure> seats;
+    
 }

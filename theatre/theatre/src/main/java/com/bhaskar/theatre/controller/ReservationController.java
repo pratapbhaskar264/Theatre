@@ -37,7 +37,7 @@ public class ReservationController {
             @RequestParam(required = false) long theaterId,
             @RequestParam(required = false) long movieId,
             @RequestParam(required = false) long userId,
-            @RequestParam(defaultValue = "BOOKED") String reservationStatus,
+            @RequestParam( defaultValue = "BOOKED") String reservationStatus,
             @RequestParam(required = false) String createdDate
     ){
 

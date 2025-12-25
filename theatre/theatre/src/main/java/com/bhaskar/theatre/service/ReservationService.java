@@ -85,13 +85,11 @@ public class ReservationService {
                             .map(Optional::get)
                             .toList();
 
-                    // Calculate the amount to be paid.
                     Double amountToBePaid = seats.stream().map(Seat::getPrice).reduce(0.0, Double::sum);
 
                     if(reservationRequestDto.getAmount() != amountToBePaid)
                         throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
 
-                    // Acquire the lock for all seats
                     seats.forEach(seat -> {
                         ReentrantLock seatLock = seatLockManager.getLockForSeat(seat.getId());
                         boolean isLockFree = seatLock.tryLock();
