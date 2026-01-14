@@ -90,38 +90,36 @@ public class UserController {
                 .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
     }
 
-//    @PostMapping("/user")
-//    public ResponseEntity<UserResponseDto> createUser( @RequestBody UserRequestDto request) {
-//
-//        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-//            throw new UserExistsException(USER_EXISTS, HttpStatus.BAD_REQUEST);
-//        }
-//
-//
-//        User user = User.builder()
-//                .username(request.getUsername())
-//                .email(request.getEmail())
-//                .firstName(request.getFirstName())
-//                .lastName(request.getLastName())
-//                .password(passwordEncoder.encode(request.getPassword()))
-//                .role(Role.ROLE_USER)
-//                .build();
-//
-//        User savedUser = userRepository.save(user);
-//
-//        return ResponseEntity.ok(
-//                UserResponseDto.builder()
-//                        .id(savedUser.getId())
-//                        .username(savedUser.getUsername())
-//                        .email(savedUser.getEmail())
-//                        .firstName(savedUser.getFirstName())
-//                        .lastName(savedUser.getLastName())
-//                        .role(savedUser.getRole())
-//                        .build()
-//        );
-//    }
+    @DeleteMapping("/user/me/delete")
+    public ResponseEntity<ApiResponseDto> deleteOwnAccount() {
+        // Get username from token
+        String currentUsername = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        return userRepository.findByUsername(currentUsername)
+                .map(user -> {
+                    userRepository.delete(user);
+                    return ResponseEntity.ok(
+                            ApiResponseDto.builder()
+                                    .message("Your account has been deleted successfully")
+                                    .build()
+                    );
+                })
+                .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
+    }
 
+    @Secured({"ROLE_SUPER_ADMIN"})
+    @DeleteMapping("/user/delete/{userId}")
+    public ResponseEntity<ApiResponseDto> deleteUserById(@PathVariable long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new UsernameNotFoundException(USER_NOT_FOUND);
+        }
 
+        userRepository.deleteById(userId);
 
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .message("User with ID " + userId + " deleted by Admin")
+                        .build()
+        );
+    }
 }
