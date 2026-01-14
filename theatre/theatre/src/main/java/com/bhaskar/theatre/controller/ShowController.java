@@ -5,6 +5,10 @@ import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.dto.ShowRequestDto;
 import com.bhaskar.theatre.dto.ShowTimingUpdateDto;
 import com.bhaskar.theatre.entity.Show;
+import com.bhaskar.theatre.entity.Theatre;
+import com.bhaskar.theatre.exception.ShowTimingClashException;
+import com.bhaskar.theatre.repository.ShowRepository;
+import com.bhaskar.theatre.repository.TheatreRespository;
 import com.bhaskar.theatre.service.ShowService;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +20,23 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
+import static com.bhaskar.theatre.constant.ExceptionMessages.TIMING_CLASH;
+
 @RestController
 @RequestMapping("/api/v1/shows")
 public class ShowController {
 
     private final ShowService showService;
+    private final TheatreRespository theatreRespository;
+    private final ShowRepository showRepository;
 
     @Autowired
-    public ShowController(ShowService showService) {
+    public ShowController(ShowService showService, TheatreRespository theatreRespository, ShowRepository showRepository) {
         this.showService = showService;
+        this.theatreRespository = theatreRespository;
+        this.showRepository = showRepository;
     }
 
 
@@ -77,6 +89,20 @@ public class ShowController {
     @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @PostMapping("/show/create")
     public ResponseEntity<ApiResponseDto> createShow(@RequestBody ShowRequestDto showRequestDto){
+        // 1. Fetch Theatre and Movie (Logic already exists in your service)
+        Theatre theatre = theatreRespository.findById(showRequestDto.getTheatreId())
+                .orElseThrow(() -> new RuntimeException("Theatre not found"));
+
+        // 2. CHECK FOR CLASHES
+        boolean isClashing = showRepository.existsByTheatreAndStartTimeBeforeAndEndTimeAfter(
+                theatre,
+                LocalDateTime.parse(showRequestDto.getEndTime()),
+                LocalDateTime.parse(showRequestDto.getStartTime())
+        );
+
+        if (isClashing) {
+            throw new ShowTimingClashException(TIMING_CLASH,HttpStatus.BAD_REQUEST);
+        }
         Show show = showService.createNewShow(showRequestDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -4,6 +4,7 @@ public class ExceptionMessages {
 
 
     public static final String USER_EXISTS = "Username already taken";
+    public static final String TIMING_CLASH = "This theatre already has a show scheduled during this time!";
     public static final String USER_NOT_FOUND = "Username not found";
     public static final String MOVIE_NOT_FOUND = "Movie not found";
     public static final String THEATRE_NOT_FOUND = "Theater not found";
