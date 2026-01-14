@@ -8,8 +8,16 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface ShowRepository extends JpaRepository<Show ,Long> {
+//@Repository
+public interface ShowRepository extends JpaRepository<Show, Long> {
     Page<Show> findByTheatreId(long theatreId, Pageable pageable);
     Page<Show> findByMovieId(long movieId, Pageable pageable);
-    Page<Show> findByTheatreIdAndMovieId(long theatreId,long movieId, Pageable pageable);
+    Page<Show> findByTheatreIdAndMovieId(long theatreId, long movieId, Pageable pageable);
+
+    // ADD THIS METHOD:
+    boolean existsByTheatreAndStartTimeBeforeAndEndTimeAfter(
+            com.bhaskar.theatre.entity.Theatre theatre,
+            java.time.LocalDateTime endTime,
+            java.time.LocalDateTime startTime
+    );
 }

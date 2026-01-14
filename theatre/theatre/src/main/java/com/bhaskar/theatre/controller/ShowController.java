@@ -89,11 +89,11 @@ public class ShowController {
     @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @PostMapping("/show/create")
     public ResponseEntity<ApiResponseDto> createShow(@RequestBody ShowRequestDto showRequestDto){
-        // 1. Fetch Theatre and Movie (Logic already exists in your service)
         Theatre theatre = theatreRespository.findById(showRequestDto.getTheatreId())
                 .orElseThrow(() -> new RuntimeException("Theatre not found"));
 
-        // 2. CHECK FOR CLASHES
+        //fix this exists by and all
+
         boolean isClashing = showRepository.existsByTheatreAndStartTimeBeforeAndEndTimeAfter(
                 theatre,
                 LocalDateTime.parse(showRequestDto.getEndTime()),
