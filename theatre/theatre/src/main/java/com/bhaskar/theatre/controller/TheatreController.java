@@ -95,6 +95,7 @@ public class TheatreController {
     }
 
 //    @Secured({"ROLE_ADMIN"})
+    @Secured({"ROLE_SUPER_ADMIN","ROLE_ADMIN"})
     @DeleteMapping("/theatre/delete/{theatreId}")
     public ResponseEntity<?> deleteTheatreById(@PathVariable long theatreId){
         theatreService.deleteTheatreById(theatreId);
