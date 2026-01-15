@@ -7,6 +7,7 @@ import com.bhaskar.theatre.dto.ReservationRequestDto;
 import com.bhaskar.theatre.entity.Reservation;
 import com.bhaskar.theatre.service.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -23,26 +24,47 @@ public class ReservationController {
     public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
     }
-
     @GetMapping("/user/all")
     public ResponseEntity<PagedApiResponseDto> getAllReservationsForCurrentUser(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ){
-        return null;
+        // Extract the username from the JWT token
+        String currentUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Page<Reservation> reservationPage = reservationService.getReservationsByUsername(currentUserName, page, size);
+
+        return ResponseEntity.ok(
+                PagedApiResponseDto.builder()
+                        .currentCount(reservationPage.getNumberOfElements())
+                        .currentPageData(reservationPage.getContent())
+                        .totalElements(reservationPage.getTotalElements())
+                        .totalPages(reservationPage.getTotalPages())
+                        .build()
+        );
     }
+
     @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @GetMapping("/filter")
     public ResponseEntity<PagedApiResponseDto> filterReservations(
-            @RequestParam(required = false) long theaterId,
-            @RequestParam(required = false) long movieId,
-            @RequestParam(required = false) long userId,
-            @RequestParam( defaultValue = "BOOKED") String reservationStatus,
+            @RequestParam(required = false) Long theaterId,
+            @RequestParam(required = false) Long movieId,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(defaultValue = "BOOKED") String reservationStatus,
             @RequestParam(required = false) String createdDate
     ){
+        // Use Long (Object) instead of long (primitive) to allow nulls for optional params
+        Page<Reservation> filteredPage = reservationService.filterReservations(
+                theaterId, movieId, userId, reservationStatus, createdDate, page, size);
 
-
-        return null;
+        return ResponseEntity.ok(
+                PagedApiResponseDto.builder()
+                        .currentCount(filteredPage.getNumberOfElements())
+                        .currentPageData(filteredPage.getContent())
+                        .totalElements(filteredPage.getTotalElements())
+                        .totalPages(filteredPage.getTotalPages())
+                        .build()
+        );
     }
 
 
