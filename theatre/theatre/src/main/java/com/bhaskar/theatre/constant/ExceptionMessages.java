@@ -12,6 +12,7 @@ public class ExceptionMessages {
     public static final String RESERVATION_NOT_FOUND = "Reservation not found";
     public static final String AMOUNT_NOT_MATCH =
             "Paying amount is not matching with the amount to be paid";
+    public static final String UNAUTHORIZED_EXCEPTION = "Sorry you're not authorized to see someone else reservation!";
     public static final String SEAT_ALREADY_BOOKED =
             "Seats are already booked";
     public static final String SEAT_LOCK_ACCQUIRED =

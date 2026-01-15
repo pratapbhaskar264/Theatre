@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -28,4 +30,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             Long userId,
             ReservationStatus status,
             Pageable pageable);
+
 }

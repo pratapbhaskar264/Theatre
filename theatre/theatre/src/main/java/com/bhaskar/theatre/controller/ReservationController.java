@@ -90,7 +90,8 @@ public class ReservationController {
 
     @GetMapping("/reservation/{reservationId}")
     public ResponseEntity<ApiResponseDto> getReservationById(@PathVariable long reservationId){
-        Reservation reservation = reservationService.getReservationById(reservationId);
+        String currentUserName = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Reservation reservation = reservationService.getReservationById(currentUserName,reservationId);
         return ResponseEntity.ok(
                 ApiResponseDto.builder()
                         .message("Reservation Fetched with id: " + reservation.getId())

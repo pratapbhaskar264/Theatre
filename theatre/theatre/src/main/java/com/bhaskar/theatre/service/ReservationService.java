@@ -5,6 +5,7 @@ package com.bhaskar.theatre.service;
 import com.bhaskar.theatre.dto.ReservationRequestDto;
 import com.bhaskar.theatre.entity.Reservation;
 import com.bhaskar.theatre.entity.Seat;
+import com.bhaskar.theatre.entity.User;
 import com.bhaskar.theatre.enums.ReservationStatus;
 import com.bhaskar.theatre.enums.SeatStatus;
 import com.bhaskar.theatre.exception.*;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,10 +113,17 @@ public class ReservationService {
         }).orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
 
-    public Reservation getReservationById(long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
+    public Reservation getReservationById(String currentUserName, long reservationId) {
+        // This query fetches the reservation row and ONLY its linked seats
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElse(null);
 
+        // Security check we discussed
+        if (!reservation.getUser().getUsername().equals(currentUserName)) {
+            throw new UnAuthorizedException(UNAUTHORIZED_EXCEPTION , HttpStatus.BAD_REQUEST);
+        }
+
+        return reservation;
     }
     public Reservation cancelReservation(long reservationId) {
         return reservationRepository.findById(reservationId)
