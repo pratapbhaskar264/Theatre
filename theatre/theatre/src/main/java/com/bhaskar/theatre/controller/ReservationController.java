@@ -51,7 +51,9 @@ public class ReservationController {
             @RequestParam(required = false) Long movieId,
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "BOOKED") String reservationStatus,
-            @RequestParam(required = false) String createdDate
+            @RequestParam(required = false) String createdDate,
+            @RequestParam(defaultValue = "0") int page,    // <-- ADD THIS
+            @RequestParam(defaultValue = "10") int size
     ){
         // Use Long (Object) instead of long (primitive) to allow nulls for optional params
         Page<Reservation> filteredPage = reservationService.filterReservations(
