@@ -14,6 +14,8 @@ import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -163,6 +165,15 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
 
 
+    }
+    public Page<Reservation> getReservationsByUsername(String username, int page, int size) {
+        return reservationRepository.findByUserUsername(username, PageRequest.of(page, size));
+    }
+
+    public Page<Reservation> filterReservations(Long theaterId, Long movieId, Long userId, String status, String date, int page, int size) {
+        // Convert String status to Enum if necessary
+        ReservationStatus resStatus = ReservationStatus.valueOf(status);
+        return reservationRepository.filterReservations(theaterId, movieId, userId, resStatus, PageRequest.of(page, size));
     }
 //    public PagedApiResponseDto filterReservations(
 //            Long theaterId,
