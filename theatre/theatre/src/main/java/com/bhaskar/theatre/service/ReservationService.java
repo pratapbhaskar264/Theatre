@@ -54,33 +54,6 @@ public class ReservationService {
         // (@Autowired on the variable), or setter injection, the
         // class remains a singleton because of that top-level annotation.
     }
-//
-//
-//    public PagedApiResponseDto getAllReservationsForCurrentUser(int page, int size) {
-//        String username = SecurityContextHolder
-//                .getContext()
-//                .getAuthentication()
-//                .getName();
-//        Pageable pageable = (Pageable) PageRequest.of(
-//                page,
-//                size,
-//                Sort.by("createdAt").descending()
-//        );
-//
-//        Page<Reservation> reservationPage =
-//                reservationRepository.findByUserUsername(username, (java.awt.print.Pageable) pageable);
-//
-//        // 4️⃣ Build paged response DTO
-//        return PagedApiResponseDto.builder()
-//                .content(reservationPage.getContent())
-//                .pageNumber(reservationPage.getNumber())
-//                .pageSize(reservationPage.getSize())
-//                .totalElements(reservationPage.getTotalElements())
-//                .totalPages(reservationPage.getTotalPages())
-//                .isLast(reservationPage.isLast())
-//                .build();
-//    }
-
     @Transactional
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
         return showRepository.findById(reservationRequestDto.getShowId()).map(show -> {
@@ -107,7 +80,6 @@ public class ReservationService {
                     }
                 }
 
-                // 3. Double Check Status (Inside the lock!)
                 boolean anyBookedSeat = seats.stream()
                         .anyMatch(s -> s.getStatus().equals(SeatStatus.BOOKED));
 
@@ -115,7 +87,6 @@ public class ReservationService {
                     throw new SeatAlreadyBookedException(SEAT_ALREADY_BOOKED, HttpStatus.BAD_REQUEST);
                 }
 
-                // 4. Perform Update
                 seats.forEach(seat -> {
                     seat.setStatus(SeatStatus.BOOKED);
                     seatRepository.save(seat);
@@ -131,7 +102,6 @@ public class ReservationService {
                         .build());
 
             } finally {
-                // 5. CRITICAL: This runs NO MATTER WHAT (success or exception)
                 lockedSeats.forEach(seat -> {
                     ReentrantLock lock = seatLockManager.getLockForSeat(seat.getId());
                     if (lock.isHeldByCurrentThread()) {
@@ -176,42 +146,5 @@ public class ReservationService {
         ReservationStatus resStatus = ReservationStatus.valueOf(status);
         return reservationRepository.filterReservations(theaterId, movieId, userId, resStatus, PageRequest.of(page, size));
     }
-//    public PagedApiResponseDto filterReservations(
-//            Long theaterId,
-//            Long movieId,
-//            Long userId,
-//            String reservationStatus,
-//            String createdDate,
-//            int page,
-//            int size
-//    ) {
-//
-//        ReservationStatus status = ReservationStatus.valueOf(reservationStatus);
-//
-//        Specification<Reservation> specification =
-//                Specification.where(ReservationSpecification.hasTheaterId(theaterId))
-//                        .and(ReservationSpecification.hasMovieId(movieId))
-//                        .and(ReservationSpecification.hasUserId(userId))
-//                        .and(ReservationSpecification.hasStatus(status))
-//                        .and(ReservationSpecification.createdOn(createdDate));
-//
-//        Pageable pageable = PageRequest.of(
-//                page,
-//                size,
-//                Sort.by("createdAt").descending()
-//        );
-//
-//        Page<Reservation> reservationPage =
-//                reservationRepository.findAll(specification, pageable);
-//
-//        return PagedApiResponseDto.builder()
-//                .content(reservationPage.getContent())
-//                .pageNumber(reservationPage.getNumber())
-//                .pageSize(reservationPage.getSize())
-//                .totalElements(reservationPage.getTotalElements())
-//                .totalPages(reservationPage.getTotalPages())
-//                .isLast(reservationPage.isLast())
-//                .build();
-//    }
 
 }
