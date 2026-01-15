@@ -64,9 +64,6 @@ public class ReservationService {
                     .toList();
 
             // 1. Logic checks first (Amount check)
-            Double amountToBePaid = seats.stream().map(Seat::getPrice).reduce(0.0, Double::sum);
-            if(reservationRequestDto.getAmount() != amountToBePaid)
-                throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST);
 
             List<Seat> lockedSeats = new ArrayList<>();
             try {
@@ -86,6 +83,9 @@ public class ReservationService {
                 if (anyBookedSeat) {
                     throw new SeatAlreadyBookedException(SEAT_ALREADY_BOOKED, HttpStatus.BAD_REQUEST);
                 }
+                Double amountToBePaid = seats.stream().map(Seat::getPrice).reduce(0.0, Double::sum);
+                if(reservationRequestDto.getAmount() != amountToBePaid)
+                    throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST,amountToBePaid);
 
                 seats.forEach(seat -> {
                     seat.setStatus(SeatStatus.BOOKED);
