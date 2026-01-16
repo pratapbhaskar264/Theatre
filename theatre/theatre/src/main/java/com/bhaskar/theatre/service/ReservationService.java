@@ -138,8 +138,9 @@ public class ReservationService {
                             });
                      //Hard Delete
                      //But soft delete allows us to see the transactions (as of now) but might seem cluttered as well
-                    reservationIdb.getSeatsReserved().clear();
-                    reservationRepository.delete(reservationIdb);
+//                    reservationIdb.getSeatsReserved().clear();
+//                    reservationRepository.delete(reservationIdb);
+
                     reservationIdb.setReservationStatus(ReservationStatus.CANCELED);
 
 
