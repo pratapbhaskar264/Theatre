@@ -136,8 +136,13 @@ public class ReservationService {
                                 seat.setStatus(SeatStatus.UNBOOKED);
                                 seatRepository.save(seat);
                             });
-
+                     //Hard Delete
+                     //But soft delete allows us to see the transactions (as of now) but might seem cluttered as well
+                    reservationIdb.getSeatsReserved().clear();
+                    reservationRepository.delete(reservationIdb);
                     reservationIdb.setReservationStatus(ReservationStatus.CANCELED);
+
+
                     return reservationRepository.save(reservationIdb);
                 })
                 .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
