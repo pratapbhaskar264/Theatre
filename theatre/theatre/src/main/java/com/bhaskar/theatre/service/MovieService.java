@@ -71,7 +71,7 @@ public class MovieService {
                 .movieName(movieRequestDto.getMovieName())
                 .releaseDate(LocalDate.parse(movieRequestDto.getReleaseDate()))
                 .build();
-
+        redisService.deleteByPattern("movies:all:");
         return movieRepository.save(movie);
     }
 //    @Transactional
@@ -123,6 +123,9 @@ public class MovieService {
 
 
     public void deleteMovieById(long movieId) {
+        redisService.deleteByPattern("movies:all:");
+
+        redisService.delete("movie:" + movieId);
         movieRepository.deleteById(movieId);
     }
 }
