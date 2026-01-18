@@ -30,7 +30,6 @@ public class SeatService {
                 )
                 .toList();
 
-        // 2. Perform a single batch save
         return seatRepository.saveAll(seatsToSave);
     }
 
