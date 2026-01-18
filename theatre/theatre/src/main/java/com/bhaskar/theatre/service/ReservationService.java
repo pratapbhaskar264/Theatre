@@ -36,13 +36,14 @@ public class ReservationService {
     private final SeatRepository seatRepository;
     private final ShowRepository showRepository;
     private final UserRepository userRepository;
+    private final RedisService redisService;
 
     @Autowired
     public ReservationService(SeatLockManager seatLockManager,
                               ReservationRepository reservationRepository,
                               SeatRepository seatRepository,
                               ShowRepository showRepository,
-                              UserRepository userRepository) {
+                              UserRepository userRepository, RedisService redisService) {
         this.seatLockManager = seatLockManager;
         this.reservationRepository = reservationRepository;
         this.seatRepository = seatRepository;
@@ -53,6 +54,7 @@ public class ReservationService {
         // Whether you use constructor injection, field injection
         // (@Autowired on the variable), or setter injection, the
         // class remains a singleton because of that top-level annotation.
+        this.redisService = redisService;
     }
     @Transactional
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
@@ -91,6 +93,11 @@ public class ReservationService {
                     seat.setStatus(SeatStatus.BOOKED);
                     seatRepository.save(seat);
                 });
+
+                //seat structure eviction from redis
+                String cacheKey = "seats:show:" + reservationRequestDto.getShowId();
+                redisService.delete(cacheKey);
+
 
                 return reservationRepository.save(Reservation.builder()
                         .reservationStatus(ReservationStatus.BOOKED)
