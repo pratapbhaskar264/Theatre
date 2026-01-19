@@ -14,7 +14,6 @@ import com.bhaskar.theatre.repository.SeatRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
+import org.redisson.api.RLock;
 
 import static com.bhaskar.theatre.constant.ExceptionMessages.*;
 
