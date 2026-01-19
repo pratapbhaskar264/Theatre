@@ -14,6 +14,7 @@ import com.bhaskar.theatre.repository.SeatRepository;
 import com.bhaskar.theatre.repository.ShowRepository;
 import com.bhaskar.theatre.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,13 +38,15 @@ public class ReservationService {
     private final ShowRepository showRepository;
     private final UserRepository userRepository;
     private final RedisService redisService;
+    private final RedissonClient redissonClient;
+
 
     @Autowired
     public ReservationService(SeatLockManager seatLockManager,
                               ReservationRepository reservationRepository,
                               SeatRepository seatRepository,
                               ShowRepository showRepository,
-                              UserRepository userRepository, RedisService redisService) {
+                              UserRepository userRepository, RedisService redisService, RedissonClient redissonClient) {
         this.seatLockManager = seatLockManager;
         this.reservationRepository = reservationRepository;
         this.seatRepository = seatRepository;
@@ -55,6 +58,7 @@ public class ReservationService {
         // (@Autowired on the variable), or setter injection, the
         // class remains a singleton because of that top-level annotation.
         this.redisService = redisService;
+        this.redissonClient = redissonClient;
     }
     @Transactional
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
@@ -150,12 +154,14 @@ public class ReservationService {
 
                     reservationIdb.setReservationStatus(ReservationStatus.CANCELED);
 
+                    if(reservationIdb !=null) {
+                    String key = "seats:show:" + reservationIdb.getShow().getShowId() ;
+                    redisService.delete(key);
+                    }
 
                     return reservationRepository.save(reservationIdb);
                 })
                 .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
-
-
     }
     public Page<Reservation> getReservationsByUsername(String username, int page, int size) {
         return reservationRepository.findByUserUsername(username, PageRequest.of(page, size));
