@@ -72,11 +72,12 @@ public class ReservationService {
                     .map(Optional::get)
                     .toList();
 
-            // Track acquired Redisson locks
+            // Track acquired Redisson locks (if possible line 91)
+
             List<RLock> acquiredLocks = new ArrayList<>();
 
             try {
-                // 1. Sort IDs to prevent Deadlocks (Professional Best Practice)
+                // 1. Sort IDs to prevent Deadlock
                 List<Long> sortedIds = reservationRequestDto.getSeatIdsReserve().stream().sorted().toList();
 
                 // 2. Acquire Distributed Locks
@@ -86,6 +87,7 @@ public class ReservationService {
 
                     // tryLock(waitTime, leaseTime, unit)
                     // We wait 5s for others to finish; Auto-release after 10s if server crashes
+                    // actual redis client implementation
                     if (seatLock.tryLock(5, 10, TimeUnit.SECONDS)) {
                         acquiredLocks.add(seatLock);
                     } else {
@@ -114,7 +116,7 @@ public class ReservationService {
                     seatRepository.save(seat);
                 });
 
-                // 6. Redis Cache Eviction (Your RedisService)
+                // 6. Redis Cache Eviction for seat structure
                 String cacheKey = "seats:show:" + reservationRequestDto.getShowId();
                 redisService.delete(cacheKey);
 
