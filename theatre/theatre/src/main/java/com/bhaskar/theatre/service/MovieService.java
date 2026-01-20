@@ -104,21 +104,12 @@ public class MovieService {
                     movieInDb.setMovieLength(movieRequestDto.getMovieLength());
 
                     return movieRepository.save(movieInDb);
-                });
+                }).orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.NOT_FOUND));
 
-                if(updatedMovie!=null) {
                     redisService.deleteByPattern("movies:all:");
-
                     redisService.delete("movie:" + movieId);
 
-                }
-
-                if(updatedMovie!=null){
                     return updatedMovie;
-                }
-                else{
-                    throw new MovieNotFoundException(MOVIE_NOT_FOUND,HttpStatus.NOT_FOUND);
-                }
     }
 
 

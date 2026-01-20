@@ -1,12 +1,12 @@
 package com.bhaskar.theatre.entity;
 
+import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.enums.SeatStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 @Entity
 @Data
@@ -26,5 +26,8 @@ public class Seat {
     private int number;
     private String area;
 
-
+    // ADD THIS RELATIONSHIP
+    @ManyToOne
+    @JoinColumn(name = "show_id")
+    private Show show;
 }

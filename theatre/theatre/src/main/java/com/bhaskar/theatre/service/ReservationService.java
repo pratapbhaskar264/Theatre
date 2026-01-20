@@ -104,12 +104,14 @@ public class ReservationService {
                     throw new SeatAlreadyBookedException(SEAT_ALREADY_BOOKED, HttpStatus.BAD_REQUEST);
                 }
 
-                // 4. Amount validation
-                Double amountToBePaid = seats.stream().map(Seat::getPrice).reduce(0.0, Double::sum);
-                if (!reservationRequestDto.getAmount().equals(amountToBePaid)) {
+                 // 4. Amount validation
+                double amountToBePaid = seats.stream()
+                        .mapToDouble(Seat::getPrice) // Use mapToDouble for primitive stream
+                        .sum();
+                // Compare using primitive check or Double.compare earlier I was comparing objects
+                if (Double.compare(reservationRequestDto.getAmount(), amountToBePaid) != 0) {
                     throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST, amountToBePaid);
                 }
-
                 // 5. Update Database
                 seats.forEach(seat -> {
                     seat.setStatus(SeatStatus.BOOKED);
@@ -156,34 +158,34 @@ public class ReservationService {
         }
 
         return reservation;
-    }
-    public Reservation cancelReservation(long reservationId) {
+    }public Reservation cancelReservation(long reservationId) {
         return reservationRepository.findById(reservationId)
-                .map(reservationIdb -> {
-                    if (LocalDateTime.now().isAfter(reservationIdb.getShow().getStartTime()))
+                .map(reservation -> {
+                    // 1. Check if show already started
+                    if (LocalDateTime.now().isAfter(reservation.getShow().getStartTime()))
                         throw new ShowStartedException(SHOW_STARTED_EXCEPTION, HttpStatus.BAD_REQUEST);
 
-                    reservationIdb.getSeatsReserved()
-                            .forEach(seat -> {
-                                seat.setStatus(SeatStatus.UNBOOKED);
-                                seatRepository.save(seat);
-                            });
-                     //Hard Delete
-                     //But soft delete allows us to see the transactions (as of now) but might seem cluttered as well
-//                    reservationIdb.getSeatsReserved().clear();
-//                    reservationRepository.delete(reservationIdb);
+                    // 2. Reset seat statuses
+                    reservation.getSeatsReserved().forEach(seat -> {
+                        seat.setStatus(SeatStatus.UNBOOKED);
+                        seatRepository.save(seat);
+                    });
 
-                    reservationIdb.setReservationStatus(ReservationStatus.CANCELED);
+                    // 3. Update reservation status
+                    reservation.setReservationStatus(ReservationStatus.CANCELED);
 
-                    if(reservationIdb !=null) {
-                    String key = "seats:show:" + reservationIdb.getShow().getShowId() ;
+                    // 4. EVICT CACHE - Fixed the getShowId() call
+                    // Assuming your Show entity has a field 'showId'
+                    // Change getShowId() to getId()
+                    String key = "seats:show:" + reservation.getShow().getId();
                     redisService.delete(key);
-                    }
 
-                    return reservationRepository.save(reservationIdb);
+                    return reservationRepository.save(reservation);
                 })
                 .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
+
+
     public Page<Reservation> getReservationsByUsername(String username, int page, int size) {
         return reservationRepository.findByUserUsername(username, PageRequest.of(page, size));
     }
