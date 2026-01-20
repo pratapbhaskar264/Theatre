@@ -51,13 +51,20 @@ public class MovieService {
     }
 
     public Movie getMovieById(long movieId) {
-        return movieRepository.findById(movieId)
-                .orElseThrow(() ->
-                        new MovieNotFoundException(
-                                MOVIE_NOT_FOUND,
-                                HttpStatus.NOT_FOUND
-                        )
-                );
+        String cacheKey = "movie:" + movieId;
+
+        // 1. Try to get from Redis
+        Movie cachedMovie = redisService.get(cacheKey, Movie.class);
+        if (cachedMovie != null) return cachedMovie;
+
+        // 2. If not in Redis, get from DB
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.NOT_FOUND));
+
+        // 3. Put in Redis for next time (expires in 60 mins)
+        redisService.set(cacheKey, movie, 60L);
+
+        return movie;
 
     }
 
@@ -74,24 +81,6 @@ public class MovieService {
         redisService.deleteByPattern("movies:all:");
         return movieRepository.save(movie);
     }
-//    @Transactional
-//    public Movie updateMovie(Long id, MovieRequestDto dto) {
-//        // 1. Update DB
-//        Movie updatedMovie = movieRepository.findById(id)
-//                .map(movie -> {
-//                    movie.setTitle(dto.getTitle());
-//                    // ... other fields
-//                    return movieRepository.save(movie);
-//                }).orElseThrow();
-//
-//        // 2. Clear the LIST cache (all pages)
-//        redisService.deleteByPattern("movies:all:");
-//
-//        // 3. Clear the INDIVIDUAL movie cache
-//        redisService.delete("movie:" + id);
-//
-//        return updatedMovie;
-//    }
     public Movie updateMovieById(long movieId, MovieRequestDto movieRequestDto) {
 
 
@@ -107,7 +96,7 @@ public class MovieService {
                 }).orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.NOT_FOUND));
 
                     redisService.deleteByPattern("movies:all:");
-                    redisService.delete("movie:" + movieId);
+                    redisService.delete("movie:" + movieId); // individual cache clearance
 
                     return updatedMovie;
     }
