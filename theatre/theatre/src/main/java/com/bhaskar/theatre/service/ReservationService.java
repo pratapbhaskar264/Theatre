@@ -66,86 +66,70 @@ public class ReservationService {
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
         return showRepository.findById(reservationRequestDto.getShowId()).map(show -> {
 
-            // Fetch the seats requested
+            // 1. Fetch and Validate Seats (Ensuring they belong to THIS show)
             List<Seat> seats = reservationRequestDto.getSeatIdsReserve().stream()
-                    .map(seatRepository::findById)
-                    .map(Optional::get)
+                    .map(id -> seatRepository.findById(id)
+                            .orElseThrow(() -> null))
                     .toList();
 
-            // Track acquired Redisson locks (if possible line 91)
+            // VALIDATION: Ensure all seats belong to the requested show
+            for (Seat seat : seats) {
+                if (seat.getShow().getId() != show.getId()) {
+                    throw new RuntimeException("Seat " + seat.getNumber() + " does not belong to show: " + show.getId());
+                }
+            }
 
             List<RLock> acquiredLocks = new ArrayList<>();
-
             try {
-                // 1. Sort IDs to prevent Deadlock
+                // 2. Distributed Locking
                 List<Long> sortedIds = reservationRequestDto.getSeatIdsReserve().stream().sorted().toList();
-
-                // 2. Acquire Distributed Locks
                 for (Long seatId : sortedIds) {
-                    // Get a lock specific to this seat ID from Redis
                     RLock seatLock = redissonClient.getLock("lock:seat:" + seatId);
-
-                    // tryLock(waitTime, leaseTime, unit)
-                    // We wait 5s for others to finish; Auto-release after 10s if server crashes
-                    // actual redis client implementation
                     if (seatLock.tryLock(5, 10, TimeUnit.SECONDS)) {
                         acquiredLocks.add(seatLock);
                     } else {
-                        // Using your existing exception
                         throw new SeatLockAccquiredException(SEAT_LOCK_ACCQUIRED, HttpStatus.CONFLICT);
                     }
                 }
 
-                // 3. Logic checks (Status check)
-                boolean anyBookedSeat = seats.stream()
-                        .anyMatch(s -> s.getStatus().equals(SeatStatus.BOOKED));
-
-                if (anyBookedSeat) {
+                // 3. Status Check
+                if (seats.stream().anyMatch(s -> s.getStatus().equals(SeatStatus.BOOKED))) {
                     throw new SeatAlreadyBookedException(SEAT_ALREADY_BOOKED, HttpStatus.BAD_REQUEST);
                 }
 
-                 // 4. Amount validation
-                double amountToBePaid = seats.stream()
-                        .mapToDouble(Seat::getPrice) // Use mapToDouble for primitive stream
-                        .sum();
-                // Compare using primitive check or Double.compare earlier I was comparing objects
+                // 4. Amount Validation
+                double amountToBePaid = seats.stream().mapToDouble(Seat::getPrice).sum();
                 if (Double.compare(reservationRequestDto.getAmount(), amountToBePaid) != 0) {
                     throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST, amountToBePaid);
                 }
-                // 5. Update Database
-                seats.forEach(seat -> {
-                    seat.setStatus(SeatStatus.BOOKED);
-                    seatRepository.save(seat);
-                });
 
-                // 6. Redis Cache Eviction for seat structure
-                String cacheKey = "seats:show:" + reservationRequestDto.getShowId();
+                // 5. Update Database (Batch save is more efficient)
+                seats.forEach(seat -> seat.setStatus(SeatStatus.BOOKED));
+                seatRepository.saveAll(seats);
+
+                // 6. Cache Eviction - Specific to THIS show
+                String cacheKey = "seats:show:" + show.getId();
                 redisService.delete(cacheKey);
 
-                // 7. Save Reservation
                 return reservationRepository.save(Reservation.builder()
                         .reservationStatus(ReservationStatus.BOOKED)
                         .seatsReserved(seats)
                         .show(show)
-                        .user(userRepository.findByUsername(currentUserName).get())
+                        .user(userRepository.findByUsername(currentUserName).orElseThrow())
                         .amountPaid(reservationRequestDto.getAmount())
                         .createdAt(LocalDateTime.now())
                         .build());
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Lock acquisition interrupted", e);
+                throw new RuntimeException("Locking failed", e);
             } finally {
-                // 8. Release all locks in the finally block
                 acquiredLocks.forEach(lock -> {
-                    if (lock.isHeldByCurrentThread()) {
-                        lock.unlock();
-                    }
+                    if (lock.isHeldByCurrentThread()) lock.unlock();
                 });
             }
         }).orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
-
 
     public Reservation getReservationById(String currentUserName, long reservationId) {
         // This query fetches the reservation row and ONLY its linked seats
@@ -158,25 +142,24 @@ public class ReservationService {
         }
 
         return reservation;
-    }public Reservation cancelReservation(long reservationId) {
+    }
+
+    @Transactional
+    public Reservation cancelReservation(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .map(reservation -> {
-                    // 1. Check if show already started
+                    // 1. Time Check
                     if (LocalDateTime.now().isAfter(reservation.getShow().getStartTime()))
                         throw new ShowStartedException(SHOW_STARTED_EXCEPTION, HttpStatus.BAD_REQUEST);
 
-                    // 2. Reset seat statuses
-                    reservation.getSeatsReserved().forEach(seat -> {
-                        seat.setStatus(SeatStatus.UNBOOKED);
-                        seatRepository.save(seat);
-                    });
+                    // 2. Free the Seats
+                    reservation.getSeatsReserved().forEach(seat -> seat.setStatus(SeatStatus.UNBOOKED));
+                    seatRepository.saveAll(reservation.getSeatsReserved());
 
-                    // 3. Update reservation status
+                    // 3. Update Status
                     reservation.setReservationStatus(ReservationStatus.CANCELED);
 
-                    // 4. EVICT CACHE - Fixed the getShowId() call
-                    // Assuming your Show entity has a field 'showId'
-                    // Change getShowId() to getId()
+                    // 4. EVICT CACHE for the show this reservation belonged to
                     String key = "seats:show:" + reservation.getShow().getId();
                     redisService.delete(key);
 
@@ -184,8 +167,6 @@ public class ReservationService {
                 })
                 .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
-
-
     public Page<Reservation> getReservationsByUsername(String username, int page, int size) {
         return reservationRepository.findByUserUsername(username, PageRequest.of(page, size));
     }

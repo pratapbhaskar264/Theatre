@@ -13,4 +13,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     // This query ensures you only get seats that belong to the specific show
     @Query("SELECT s FROM Seat s WHERE s.id IN :ids AND s.show.id = :showId")
     List<Seat> findByIdsAndShowId(@Param("ids") List<Long> ids, @Param("showId") Long showId);
+    @Query("SELECT s FROM Seat s WHERE s.show.id = :showId")
+    List<Seat> findByShowId(@Param("showId") Long showId);
 }

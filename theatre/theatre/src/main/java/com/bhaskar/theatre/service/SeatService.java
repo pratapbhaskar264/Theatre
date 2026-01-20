@@ -46,11 +46,14 @@ public class SeatService {
 
     public List<Seat> getSeatsByShow(Long showId) {
         String key = "seats:show:" + showId;
+
+        // Check Redis
         List<Seat> cachedSeats = redisService.get(key, List.class);
-        if (cachedSeats != null) {
-            return cachedSeats;
-        }
+        if (cachedSeats != null) return cachedSeats;
+
+        // This now matches the name your Controller/Service used before
         List<Seat> seats = seatRepository.findByShowId(showId);
+
         if (!seats.isEmpty()) {
             redisService.set(key, seats, 10L);
         }
