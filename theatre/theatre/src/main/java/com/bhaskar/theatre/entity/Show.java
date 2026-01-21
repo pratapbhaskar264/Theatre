@@ -30,7 +30,6 @@ public class Show {
     LocalDateTime startTime;
     LocalDateTime endTime;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    List<Seat> seats;
-
+    @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Seat> seats;
 }
