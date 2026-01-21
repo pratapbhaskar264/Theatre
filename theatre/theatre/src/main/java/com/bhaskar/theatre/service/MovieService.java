@@ -55,7 +55,10 @@ public class MovieService {
 
         // 1. Try to get from Redis
         Movie cachedMovie = redisService.get(cacheKey, Movie.class);
-        if (cachedMovie != null) return cachedMovie;
+        if (cachedMovie != null){
+            System.out.println("Data from redis");
+            return cachedMovie;
+        }
 
         // 2. If not in Redis, get from DB
         Movie movie = movieRepository.findById(movieId)
