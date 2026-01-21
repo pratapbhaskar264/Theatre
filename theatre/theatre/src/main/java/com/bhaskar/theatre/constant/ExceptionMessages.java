@@ -19,4 +19,5 @@ public class ExceptionMessages {
             "Seat is getting booked by another user";
     public static final String SHOW_STARTED_EXCEPTION =
             "Show is already started";
+    public static final String SEAT_NOT_FOUND ="Seat is not available";
 }

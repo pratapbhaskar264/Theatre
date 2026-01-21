@@ -69,7 +69,7 @@ public class ReservationService {
             // 1. Fetch and Validate Seats (Ensuring they belong to THIS show)
             List<Seat> seats = reservationRequestDto.getSeatIdsReserve().stream()
                     .map(id -> seatRepository.findById(id)
-                            .orElseThrow(() -> null))
+                            .orElseThrow(() ->new SeatNotFoundException(SEAT_NOT_FOUND, HttpStatus.NOT_FOUND)))
                     .toList();
 
             // VALIDATION: Ensure all seats belong to the requested show
