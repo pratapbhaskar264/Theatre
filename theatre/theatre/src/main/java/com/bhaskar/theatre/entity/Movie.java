@@ -28,4 +28,6 @@ public class Movie {
     int movieLength;
     String movieLanguage;
     LocalDate releaseDate;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Show> shows;
 }
