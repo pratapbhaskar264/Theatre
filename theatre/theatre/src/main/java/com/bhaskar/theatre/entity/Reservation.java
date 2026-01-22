@@ -1,6 +1,7 @@
 package com.bhaskar.theatre.entity;
 
 import com.bhaskar.theatre.enums.ReservationStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +26,9 @@ public class Reservation {
     @ManyToOne
     private User user;
 
+    @JsonIgnore // <--- ADD THIS LINE HERE
     @ManyToOne
+    @JoinColumn(name = "show_id")
     private Show show;
 
     @OneToMany(fetch = FetchType.EAGER)

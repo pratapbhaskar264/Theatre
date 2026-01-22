@@ -5,6 +5,7 @@ import com.bhaskar.theatre.entity.Movie;
 import com.bhaskar.theatre.enums.MovieGenre;
 import com.bhaskar.theatre.exception.MovieNotFoundException;
 import com.bhaskar.theatre.repository.MovieRepository;
+import com.bhaskar.theatre.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,11 +26,13 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final RedisService redisService;
+    private final ReservationRepository reservationRepository;
 
     @Autowired
-    public MovieService(MovieRepository movieRepository, RedisService redisService){
+    public MovieService(MovieRepository movieRepository, RedisService redisService, ReservationRepository reservationRepository){
         this.movieRepository = movieRepository;
         this.redisService = redisService;
+        this.reservationRepository = reservationRepository;
     }
 
     public Page<Movie> getAllMovies(int page, int pageSize) {
@@ -37,6 +41,7 @@ public class MovieService {
         List<Movie> cachedContent = redisService.get(cacheKey, List.class);
 
         if (cachedContent != null) {
+            System.out.println("Movies frm redis");
             return new PageImpl<>(cachedContent, PageRequest.of(page, pageSize), cachedContent.size());
         }
 
@@ -105,10 +110,26 @@ public class MovieService {
     }
 
 
+    @Transactional
     public void deleteMovieById(long movieId) {
-        redisService.deleteByPattern("movies:all:");
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.NOT_FOUND));
 
+        // 1. CLEAR REDIS
+        redisService.deleteByPattern("movies:all:");
         redisService.delete("movie:" + movieId);
-        movieRepository.deleteById(movieId);
+        if (movie.getShows() != null) {
+            movie.getShows().forEach(show -> redisService.delete("seats:show:" + show.getId()));
+        }
+
+        // 2. MANUALLY CLEAN RESERVATIONS (If not using CascadeType.ALL)
+        if (movie.getShows() != null) {
+            movie.getShows().forEach(show -> {
+                reservationRepository.deleteByShowId(show.getId());
+            });
+        }
+
+        // 3. Physical deletion
+        movieRepository.delete(movie);
     }
 }

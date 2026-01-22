@@ -1,5 +1,6 @@
 package com.bhaskar.theatre.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,8 @@ public class Show {
     long id;
 
     @ManyToOne(targetEntity = Movie.class)
+
+    @JsonIgnore
     @JoinColumn(referencedColumnName = "id", nullable = false)
     Movie movie;
 
@@ -29,6 +32,9 @@ public class Show {
     Theatre theatre;
     LocalDateTime startTime;
     LocalDateTime endTime;
+
+    @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations;
 
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Seat> seats;
