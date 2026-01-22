@@ -1,8 +1,10 @@
 package com.bhaskar.theatre.service;
 
 import com.bhaskar.theatre.dto.ShowRequestDto;
+import com.bhaskar.theatre.entity.Movie;
 import com.bhaskar.theatre.entity.Seat;
 import com.bhaskar.theatre.entity.Show;
+import com.bhaskar.theatre.entity.Theatre;
 import com.bhaskar.theatre.exception.MovieNotFoundException;
 import com.bhaskar.theatre.exception.ShowNotFoundException;
 import com.bhaskar.theatre.exception.TheatreNotFoundException;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,19 +31,42 @@ public class ShowService {
     private final MovieRepository movieRepository;
     private final TheatreRespository theatreRepository;
     private final SeatService seatService;
+    private final RedisService redisService;
 
     @Autowired
-    public ShowService(ShowRepository showRepository, MovieRepository movieRepository, TheatreRespository theatreRepository, SeatService seatService) {
+    public ShowService(ShowRepository showRepository, MovieRepository movieRepository, TheatreRespository theatreRepository, SeatService seatService, RedisService redisService) {
         this.showRepository = showRepository;
         this.movieRepository = movieRepository;
         this.theatreRepository = theatreRepository;
         this.seatService = seatService;
+        this.redisService = redisService;
     }
 
     public Page<Show> getllShows(int page, int size) {
         return showRepository.findAll(PageRequest.of(page, size));
     }
+    public List<Seat> getSeatsByShowId(long showId) {
+        String cacheKey = "seats:show:" + showId;
 
+        // 1. Try Redis
+        List<Seat> cachedSeats = redisService.get(cacheKey, List.class);
+        if (cachedSeats != null) {
+            return cachedSeats;
+        }
+
+        // 2. Fallback to DB
+        Show show = showRepository.findById(showId)
+                .orElseThrow(() -> new RuntimeException("Show not found"));
+
+        List<Seat> seats = show.getSeats();
+
+        // 3. Cache it for 30 minutes
+        if (!seats.isEmpty()) {
+            redisService.set(cacheKey, seats, 30L);
+        }
+
+        return seats;
+    }
     public Page<Show> filterShowsByTheaterIdAndMovieId(Long theaterId, Long movieId, PageRequest pageRequest) {
         if(theaterId == null && movieId == null){
             return showRepository.findAll(pageRequest);
@@ -60,33 +86,46 @@ public class ShowService {
         showRepository.deleteById(showId);
     }
 
-//    @Transactional
-public Show createNewShow(ShowRequestDto showRequestDto) {
-    return movieRepository.findById(showRequestDto.getMovieId())
-            .map(movie -> theatreRepository.findById(showRequestDto.getTheatreId()) // Changed to theatre
-                    .map(theatre -> { // Changed to theatre
-                        List<Seat> seats = new ArrayList<>();
-                        showRequestDto.getSeats()
-                                .forEach(seatStructure ->
-                                        seats.addAll(
-                                                seatService.createSeatsWithGivenPrice(
-                                                        seatStructure.getSeatCount(),
-                                                        seatStructure.getSeatPrice(),
-                                                        seatStructure.getArea()
-                                                )
-                                        )
-                                );
+    @Transactional // This is mandatory for cascading to work
+    public Show createNewShow(ShowRequestDto showRequestDto) {
+        // 1. Fetch Movie and Theatre
+        Movie movie = movieRepository.findById(showRequestDto.getMovieId())
+                .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.BAD_REQUEST));
 
-                        Show show = Show.builder()
-                                .movie(movie)
-                                .theatre(theatre) // Changed to theatre
-                                .startTime(LocalDateTime.parse(showRequestDto.getStartTime()))
-                                .endTime(LocalDateTime.parse(showRequestDto.getEndTime()))
-                                .seats(seats)
-                                .build();
-                        return showRepository.save(show);
-                    })
-                    .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.BAD_REQUEST))) // Changed to Theatre
-            .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND, HttpStatus.BAD_REQUEST));
-}
+        Theatre theatre = theatreRepository.findById(showRequestDto.getTheatreId())
+                .orElseThrow(() -> new TheatreNotFoundException(THEATRE_NOT_FOUND, HttpStatus.BAD_REQUEST));
+
+        // 2. Build the Show object (ID is still null here)
+        Show show = Show.builder()
+                .movie(movie)
+                .theatre(theatre)
+                .startTime(LocalDateTime.parse(showRequestDto.getStartTime()))
+                .endTime(LocalDateTime.parse(showRequestDto.getEndTime()))
+                .build();
+
+        // 3. Generate and Link Seats
+        List<Seat> allGeneratedSeats = new ArrayList<>();
+        showRequestDto.getSeats().forEach(structure -> {
+            List<Seat> seats = seatService.createSeatsWithGivenPrice(
+                    structure.getSeatCount(),
+                    structure.getSeatPrice(),
+                    structure.getArea()
+            );
+
+            // LINKING STEP: This is what prevents the Transient error
+            for (Seat seat : seats) {
+                seat.setShow(show);
+            }
+            allGeneratedSeats.addAll(seats);
+        });
+
+        // 4. Attach the list to the Show
+        show.setSeats(allGeneratedSeats);
+
+        // 5. Save the Show.
+        // Because of CascadeType.ALL, Hibernate will:
+        // a) Save Show -> get generated ID
+        // b) Save all Seats using that new ID automatically
+        return showRepository.save(show);
+    }
 }

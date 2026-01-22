@@ -4,6 +4,7 @@ import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.dto.ShowRequestDto;
 import com.bhaskar.theatre.dto.ShowTimingUpdateDto;
+import com.bhaskar.theatre.entity.Seat;
 import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.entity.Theatre;
 import com.bhaskar.theatre.exception.ShowTimingClashException;
@@ -21,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.bhaskar.theatre.constant.ExceptionMessages.TIMING_CLASH;
 
@@ -55,6 +57,20 @@ public class ShowController {
                         .build()
         );
     }
+
+    @GetMapping("/{showId}/seats")
+    public ResponseEntity<ApiResponseDto> getShowSeatStructure(@PathVariable long showId) {
+        // Fetch seats (this should check Redis first, then DB)
+        List<Seat> seats = showService.getSeatsByShowId(showId);
+
+        return ResponseEntity.ok(
+                ApiResponseDto.builder()
+                        .message("Seat structure fetched for show: " + showId)
+                        .data(seats)
+                        .build()
+        );
+    }
+
     @GetMapping("/filter")
     public ResponseEntity<PagedApiResponseDto> filterShows(
             @RequestParam(required = false) Long theaterId,

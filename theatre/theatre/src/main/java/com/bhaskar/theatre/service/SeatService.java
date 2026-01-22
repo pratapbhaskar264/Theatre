@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -29,18 +30,18 @@ public class SeatService {
         this.redisService = redisService;
     }
 
-    public List<Seat> createSeatsWithGivenPrice(int seats, double price, String area){
-        List<Seat> seatsToSave = IntStream.rangeClosed(1, seats)
-                .mapToObj(i -> Seat.builder()
-                        .price(price)
-                        .number(i)
-                        .area(area)
-                        .status(SeatStatus.UNBOOKED)
-                        .build()
-                )
-                .toList();
-
-        return seatRepository.saveAll(seatsToSave);
+    public List<Seat> createSeatsWithGivenPrice(int count, double price, String area) {
+        List<Seat> seats = new ArrayList<>();
+        for (int i = 1; i <= count; i++) {
+            seats.add(Seat.builder()
+                    .number(i)
+                    .area(area)
+                    .price(price)
+                    .status(SeatStatus.UNBOOKED)
+                    // Don't call seatRepository.save() here!
+                    .build());
+        }
+        return seats;
     }
 
 
