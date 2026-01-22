@@ -2,6 +2,7 @@ package com.bhaskar.theatre.entity;
 
 import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.enums.SeatStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public class Seat {
     private String area;
 
     // ADD THIS RELATIONSHIP
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "show_id")
     private Show show;

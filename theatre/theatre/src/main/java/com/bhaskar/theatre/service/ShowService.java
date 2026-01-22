@@ -82,7 +82,15 @@ public class ShowService {
                 .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.NOT_FOUND));
     }
 
+    @Transactional
     public void deleteShowById(long showId) {
+        // 1. Define the cache key
+        String cacheKey = "seats:show:" + showId;
+
+        // 2. Clear from Redis first
+        redisService.delete(cacheKey);
+
+        // 3. Delete from DB (Seats will be deleted via CascadeType.ALL)
         showRepository.deleteById(showId);
     }
 

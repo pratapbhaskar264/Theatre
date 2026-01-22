@@ -66,17 +66,12 @@ public class ReservationService {
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
         return showRepository.findById(reservationRequestDto.getShowId()).map(show -> {
 
-            // 1. Fetch and Validate Seats (Ensuring they belong to THIS show)
-            List<Seat> seats = reservationRequestDto.getSeatIdsReserve().stream()
-                    .map(id -> seatRepository.findById(id)
-                            .orElseThrow(() ->new SeatNotFoundException(SEAT_NOT_FOUND, HttpStatus.NOT_FOUND)))
-                    .toList();
+            // 1. BULK FETCH
+            List<Seat> seats = seatRepository.findByIdInAndShowId(
+                    reservationRequestDto.getSeatIdsReserve(), show.getId());
 
-            // VALIDATION: Ensure all seats belong to the requested show
-            for (Seat seat : seats) {
-                if (seat.getShow().getId() != show.getId()) {
-                    throw new RuntimeException("Seat " + seat.getNumber() + " does not belong to show: " + show.getId());
-                }
+            if (seats.size() != reservationRequestDto.getSeatIdsReserve().size()) {
+                throw new RuntimeException("One or more seats not found or don't belong to this show.");
             }
 
             List<RLock> acquiredLocks = new ArrayList<>();
@@ -103,14 +98,15 @@ public class ReservationService {
                     throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST, amountToBePaid);
                 }
 
-                // 5. Update Database (Batch save is more efficient)
+                // 5. Update Database
                 seats.forEach(seat -> seat.setStatus(SeatStatus.BOOKED));
                 seatRepository.saveAll(seats);
 
-                // 6. Cache Eviction - Specific to THIS show
+                // 6. Cache Eviction
                 String cacheKey = "seats:show:" + show.getId();
                 redisService.delete(cacheKey);
 
+                // FIX: You must RETURN the result of the save here
                 return reservationRepository.save(Reservation.builder()
                         .reservationStatus(ReservationStatus.BOOKED)
                         .seatsReserved(seats)
@@ -122,7 +118,7 @@ public class ReservationService {
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Locking failed", e);
+                throw new RuntimeException("Booking process interrupted", e);
             } finally {
                 acquiredLocks.forEach(lock -> {
                     if (lock.isHeldByCurrentThread()) lock.unlock();
@@ -130,7 +126,6 @@ public class ReservationService {
             }
         }).orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND, HttpStatus.BAD_REQUEST));
     }
-
     public Reservation getReservationById(String currentUserName, long reservationId) {
         // This query fetches the reservation row and ONLY its linked seats
         Reservation reservation = reservationRepository.findById(reservationId)
