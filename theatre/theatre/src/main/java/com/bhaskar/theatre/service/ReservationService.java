@@ -80,7 +80,7 @@ public class ReservationService {
                 List<Long> sortedIds = reservationRequestDto.getSeatIdsReserve().stream().sorted().toList();
                 for (Long seatId : sortedIds) {
                     RLock seatLock = redissonClient.getLock("lock:seat:" + seatId);
-                    if (seatLock.tryLock(5, 10, TimeUnit.SECONDS)) {
+                    if (seatLock.tryLock(15, 10, TimeUnit.SECONDS)) {
                         acquiredLocks.add(seatLock);
                     } else {
                         throw new SeatLockAccquiredException(SEAT_LOCK_ACCQUIRED, HttpStatus.CONFLICT);
