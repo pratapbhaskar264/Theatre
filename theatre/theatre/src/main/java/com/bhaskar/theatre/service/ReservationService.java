@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.redisson.api.RLock;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static com.bhaskar.theatre.constant.ExceptionMessages.*;
 
@@ -68,17 +70,20 @@ public class ReservationService {
     public Reservation createReservation(ReservationRequestDto reservationRequestDto, String currentUserName) {
         return showRepository.findById(reservationRequestDto.getShowId()).map(show -> {
 
-            // 1. BULK FETCH
+            // 1. Fetch User and Seats
+            User user = userRepository.findByUsername(currentUserName)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
             List<Seat> seats = seatRepository.findByIdInAndShowId(
                     reservationRequestDto.getSeatIdsReserve(), show.getId());
 
             if (seats.size() != reservationRequestDto.getSeatIdsReserve().size()) {
-                throw new RuntimeException("One or more seats not found or don't belong to this show.");
+                throw new RuntimeException("One or more seats not found.");
             }
 
             List<RLock> acquiredLocks = new ArrayList<>();
             try {
-                // 2. Distributed Locking
+                // 2. Distributed Locking (Sorted to prevent Deadlocks)
                 List<Long> sortedIds = reservationRequestDto.getSeatIdsReserve().stream().sorted().toList();
                 for (Long seatId : sortedIds) {
                     RLock seatLock = redissonClient.getLock("lock:seat:" + seatId);
@@ -89,38 +94,46 @@ public class ReservationService {
                     }
                 }
 
-                // 3. Status Check
+                // 3. Validation
                 if (seats.stream().anyMatch(s -> s.getStatus().equals(SeatStatus.BOOKED))) {
                     throw new SeatAlreadyBookedException(SEAT_ALREADY_BOOKED, HttpStatus.BAD_REQUEST);
                 }
 
-                // 4. Amount Validation
                 double amountToBePaid = seats.stream().mapToDouble(Seat::getPrice).sum();
                 if (Double.compare(reservationRequestDto.getAmount(), amountToBePaid) != 0) {
                     throw new AmountNotMatchException(AMOUNT_NOT_MATCH, HttpStatus.BAD_REQUEST, amountToBePaid);
                 }
 
-                // 5. Update Database
+                // 4. Update Database
                 seats.forEach(seat -> seat.setStatus(SeatStatus.BOOKED));
                 seatRepository.saveAll(seats);
 
-                // 6. Cache Eviction
-                String cacheKey = "seats:show:" + show.getId();
-                redisService.delete(cacheKey);
-
-                // FIX: You must RETURN the result of the save here
-                return reservationRepository.save(Reservation.builder()
+                Reservation savedReservation = reservationRepository.save(Reservation.builder()
                         .reservationStatus(ReservationStatus.BOOKED)
                         .seatsReserved(seats)
                         .show(show)
-                        .user(userRepository.findByUsername(currentUserName).orElseThrow())
+                        .user(user)
                         .amountPaid(reservationRequestDto.getAmount())
                         .createdAt(LocalDateTime.now())
                         .build());
 
+                // 5. Cache Eviction (Still inside transaction)
+                redisService.delete("seats:show:" + show.getId());
+
+                // 6. Kafka "Fire after Commit" Logic
+                // This ensures Kafka only gets the message IF the DB successfully saves.
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        kafkaTemplate.send("theatre-activity", "BOOKING_ID_" + savedReservation.getId(), savedReservation);
+                    }
+                });
+
+                return savedReservation;
+
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Booking process interrupted", e);
+                throw new RuntimeException("Interrupted", e);
             } finally {
                 acquiredLocks.forEach(lock -> {
                     if (lock.isHeldByCurrentThread()) lock.unlock();
