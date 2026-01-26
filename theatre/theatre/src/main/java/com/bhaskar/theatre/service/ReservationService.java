@@ -131,7 +131,7 @@ public class ReservationService {
                                 .reservationId(savedReservation.getId())
                                 .username(savedReservation.getUser().getUsername())
                                 .showId(savedReservation.getShow().getId())
-                                .movieName(savedReservation.getShow().getMovie().getTitle())
+                                .movieName(savedReservation.getShow().getMovie().getMovieName())
                                 .seatIds(savedReservation.getSeatsReserved().stream().map(s -> s.getId()).toList())
                                 .amount(savedReservation.getAmountPaid())
                                 .status(savedReservation.getReservationStatus().toString())
