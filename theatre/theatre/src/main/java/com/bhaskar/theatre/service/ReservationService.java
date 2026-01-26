@@ -126,37 +126,26 @@ public class ReservationService {
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
-                        // Map the Entity to the DTO
-//                        BookingEvent event = BookingEvent.builder()
-//                                .reservationId(savedReservation.getId())
-//                                .username(savedReservation.getUser().getUsername())
-//                                .showId(savedReservation.getShow().getId())
-//                                .movieName(savedReservation.getShow().getMovie().getMovieName())
-//                                .seatIds(savedReservation.getSeatsReserved().stream().map(s -> s.getId()).toList())
-//                                .amount(savedReservation.getAmountPaid())
-//                                .status(savedReservation.getReservationStatus().toString())
-//                                .build();
-//
-//                        kafkaTemplate.send("theatre-activity", "RES_ID_" + event.getReservationId(), event);
-                        // Logic inside afterCommit
-                        // TEACHER'S TRICK: We use NO entities here. Only IDs and Strings.
+                        // ULTRA-SAFE MAPPING: Use raw data to break the loop
                         BookingEvent event = BookingEvent.builder()
                                 .reservationId(savedReservation.getId())
-                                .username(currentUserName)
-                                .showId(reservationRequestDto.getShowId())
-                                .movieName("TEST_MOVIE") // Hardcode this just for this one test
-                                .seatIds(reservationRequestDto.getSeatIdsReserve())
+                                .username(currentUserName) // Pass string directly
+                                .showId(reservationRequestDto.getShowId()) // Use ID from request
+                                .movieName(show.getMovie().getMovieName()) // Access movieName directly
+                                .seatIds(reservationRequestDto.getSeatIdsReserve()) // Use IDs from request
                                 .amount(reservationRequestDto.getAmount())
-                                .status("SUCCESS")
+                                .status("BOOKED")
                                 .build();
 
-                        System.out.println("DEBUG: Sending to Kafka now...");
+                        // Log to console so you can see progress before the send
+                        System.out.println("KAFKA: Preparing to send message for Reservation ID: " + event.getReservationId());
+
+                        // Send the DTO, not the Entity
                         kafkaTemplate.send("theatre-activity", String.valueOf(event.getReservationId()), event);
-                        System.out.println("DEBUG: Kafka Send Command Finished!");
-                        kafkaTemplate.send("theatre-activity", "ID_" + event.getReservationId(), event);
+
+                        System.out.println("KAFKA: Message sent successfully to topic 'theatre-activity'");
                     }
                 });
-
                 return savedReservation;
 
             } catch (InterruptedException e) {

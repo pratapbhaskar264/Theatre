@@ -3,10 +3,7 @@ package com.bhaskar.theatre.entity;
 import com.bhaskar.theatre.enums.ReservationStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,14 +21,17 @@ public class Reservation {
     private long id;
 
     @ManyToOne
+    @ToString.Exclude
     private User user;
 
-    @JsonIgnore // <--- ADD THIS LINE HERE
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "show_id")
+    @ToString.Exclude
     private Show show;
 
     @OneToMany(fetch = FetchType.EAGER)
+    @ToString.Exclude
     private List<Seat> seatsReserved;
     private double amountPaid;
 
