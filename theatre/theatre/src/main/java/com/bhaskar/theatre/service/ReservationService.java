@@ -2,6 +2,7 @@ package com.bhaskar.theatre.service;
 
 
 
+import com.bhaskar.theatre.dto.BookingEvent;
 import com.bhaskar.theatre.dto.ReservationRequestDto;
 import com.bhaskar.theatre.entity.Reservation;
 import com.bhaskar.theatre.entity.Seat;
@@ -121,11 +122,22 @@ public class ReservationService {
                 redisService.delete("seats:show:" + show.getId());
 
                 // 6. Kafka "Fire after Commit" Logic
-                // This ensures Kafka only gets the message IF the DB successfully saves.
+                // Inside your createReservation method, after the save and inside afterCommit:
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
-                        kafkaTemplate.send("theatre-activity", "BOOKING_ID_" + savedReservation.getId(), savedReservation);
+                        // Map the Entity to the DTO
+                        BookingEvent event = BookingEvent.builder()
+                                .reservationId(savedReservation.getId())
+                                .username(savedReservation.getUser().getUsername())
+                                .showId(savedReservation.getShow().getId())
+                                .movieName(savedReservation.getShow().getMovie().getTitle())
+                                .seatIds(savedReservation.getSeatsReserved().stream().map(s -> s.getId()).toList())
+                                .amount(savedReservation.getAmountPaid())
+                                .status(savedReservation.getReservationStatus().toString())
+                                .build();
+
+                        kafkaTemplate.send("theatre-activity", "RES_ID_" + event.getReservationId(), event);
                     }
                 });
 
