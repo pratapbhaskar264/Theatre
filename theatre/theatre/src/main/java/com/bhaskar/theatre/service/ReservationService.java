@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -41,7 +42,8 @@ public class ReservationService {
     private final RedisService redisService;
     private final RedissonClient redissonClient;
 
-
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
     @Autowired
     public ReservationService(SeatLockManager seatLockManager,
                               ReservationRepository reservationRepository,
