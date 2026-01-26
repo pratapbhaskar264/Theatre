@@ -132,7 +132,7 @@ public class ReservationService {
                         BookingEvent event = BookingEvent.builder()
                                 .reservationId(savedReservation.getId())
                                 .username(currentUserName)
-                                .movieName(show.getMovie().getMovieName())
+                                .movieName(show.getMovie().getMovieName()) // cross check it with bookingEventDto
                                 .status("SUCCESS")
                                 .build();
 
