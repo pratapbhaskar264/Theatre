@@ -126,24 +126,22 @@ public class ReservationService {
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
-                        // ULTRA-SAFE MAPPING: Use raw data to break the loop
+                        System.out.println("KAFKA CHECK: Starting send process...");
+
+                        // Use ONLY raw values to ensure NO serialization loops
                         BookingEvent event = BookingEvent.builder()
                                 .reservationId(savedReservation.getId())
-                                .username(currentUserName) // Pass string directly
-                                .showId(reservationRequestDto.getShowId()) // Use ID from request
-                                .movieName(show.getMovie().getMovieName()) // Access movieName directly
-                                .seatIds(reservationRequestDto.getSeatIdsReserve()) // Use IDs from request
-                                .amount(reservationRequestDto.getAmount())
-                                .status("BOOKED")
+                                .username(currentUserName)
+                                .movieName(show.getMovie().getMovieName())
+                                .status("SUCCESS")
                                 .build();
 
-                        // Log to console so you can see progress before the send
-                        System.out.println("KAFKA: Preparing to send message for Reservation ID: " + event.getReservationId());
-
-                        // Send the DTO, not the Entity
-                        kafkaTemplate.send("theatre-activity", String.valueOf(event.getReservationId()), event);
-
-                        System.out.println("KAFKA: Message sent successfully to topic 'theatre-activity'");
+                        try {
+                            kafkaTemplate.send("theatre-activity", String.valueOf(event.getReservationId()), event);
+                            System.out.println("KAFKA CHECK: Message successfully pushed to Broker!");
+                        } catch (Exception e) {
+                            System.out.println("KAFKA CHECK: Failed to send! Error: " + e.getMessage());
+                        }
                     }
                 });
                 return savedReservation;
