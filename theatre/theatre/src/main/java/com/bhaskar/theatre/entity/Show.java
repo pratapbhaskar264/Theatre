@@ -33,6 +33,7 @@ public class Show {
     LocalDateTime startTime;
     LocalDateTime endTime;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations;
 
