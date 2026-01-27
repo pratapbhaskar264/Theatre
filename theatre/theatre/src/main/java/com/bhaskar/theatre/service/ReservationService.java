@@ -188,6 +188,19 @@ public class ReservationService {
                     String key = "seats:show:" + reservation.getShow().getId();
                     redisService.delete(key);
 
+                    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                        @Override
+                        public void afterCommit() {
+                            BookingEvent event = BookingEvent.builder()
+                                    .reservationId(reservationId)
+                                    .status("CANCELED")
+                                    .seatIds(reservation.getSeatsReserved().stream().map(Seat::getId).toList())
+                                    .build();
+
+                            kafkaTemplate.send("theatre-activity", String.valueOf(reservationId), event);
+                        }
+                    });
+
                     return reservationRepository.save(reservation);
                 })
                 .orElseThrow(() -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
