@@ -6,6 +6,7 @@ import com.bhaskar.theatre.enums.SeatStatus;
 import com.bhaskar.theatre.exception.ShowNotFoundException;
 import com.bhaskar.theatre.exception.ShowStartedException;
 import com.bhaskar.theatre.repository.SeatRepository;
+import com.bhaskar.theatre.repository.ShowRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,11 +24,13 @@ import static com.bhaskar.theatre.constant.ExceptionMessages.SHOW_NOT_FOUND;
 public class SeatService {
     private final SeatRepository seatRepository;
     private final RedisService redisService;
+    private final ShowRepository showRepository;
 
     @Autowired
-    public SeatService(SeatRepository seatRepository, RedisService redisService) {
+    public SeatService(SeatRepository seatRepository, RedisService redisService, ShowRepository showRepository) {
         this.seatRepository = seatRepository;
         this.redisService = redisService;
+        this.showRepository = showRepository;
     }
 
     public List<Seat> createSeatsWithGivenPrice(int count, double price, String area) {
@@ -46,6 +49,9 @@ public class SeatService {
 
 
     public List<Seat> getSeatsByShow(Long showId) {
+
+
+
         String key = "seats:show:" + showId;
 
         // Check Redis

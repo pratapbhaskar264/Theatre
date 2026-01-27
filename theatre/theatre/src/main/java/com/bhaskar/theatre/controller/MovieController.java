@@ -4,10 +4,12 @@ import com.bhaskar.theatre.dto.MovieRequestDto;
 import com.bhaskar.theatre.dto.ApiResponseDto;
 import com.bhaskar.theatre.dto.PagedApiResponseDto;
 import com.bhaskar.theatre.entity.Movie;
+import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.service.MovieService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -85,6 +87,12 @@ public class MovieController {
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();
+    }
+
+    //get shows by movie id
+    @GetMapping("/movie/show/{movieId}")
+    public List<Show> getshowByMovieId(@PathVariable long movieId) {
+        return movieService.getShowsByMovieId(movieId);
     }
 
 }

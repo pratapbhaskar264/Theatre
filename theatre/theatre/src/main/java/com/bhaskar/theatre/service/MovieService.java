@@ -2,6 +2,7 @@ package com.bhaskar.theatre.service;
 
 import com.bhaskar.theatre.dto.MovieRequestDto;
 import com.bhaskar.theatre.entity.Movie;
+import com.bhaskar.theatre.entity.Show;
 import com.bhaskar.theatre.enums.MovieGenre;
 import com.bhaskar.theatre.exception.MovieNotFoundException;
 import com.bhaskar.theatre.repository.MovieRepository;
@@ -131,5 +132,12 @@ public class MovieService {
 
         // 3. Physical deletion
         movieRepository.delete(movie);
+    }
+
+    public List<Show> getShowsByMovieId(long movieId) {
+        return movieRepository.findById(movieId)
+                .map(Movie::getShows)
+                .orElseThrow(() -> new MovieNotFoundException(MOVIE_NOT_FOUND,HttpStatus.NOT_FOUND ));
+
     }
 }
