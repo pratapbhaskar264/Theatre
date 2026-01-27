@@ -132,7 +132,10 @@ public class ReservationService {
                         BookingEvent event = BookingEvent.builder()
                                 .reservationId(savedReservation.getId())
                                 .username(currentUserName)
+                                .showId(show.getId())
                                 .movieName(show.getMovie().getMovieName()) // cross check it with bookingEventDto
+                                .seatIds(seats.stream().map(Seat::getId).toList())
+                                .amount(reservationRequestDto.getAmount())
                                 .status("SUCCESS")
                                 .build();
 
@@ -180,6 +183,8 @@ public class ReservationService {
                     // 2. Free the Seats
                     reservation.getSeatsReserved().forEach(seat -> seat.setStatus(SeatStatus.UNBOOKED));
                     seatRepository.saveAll(reservation.getSeatsReserved());
+                    reservation.getSeatsReserved().clear(); //hard deletion .... soft caused error since it was being related to same user...harsh
+                    // was unable to book delete book delete and repeat for same seat
 
                     // 3. Update Status
                     reservation.setReservationStatus(ReservationStatus.CANCELED);
