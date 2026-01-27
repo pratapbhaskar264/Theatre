@@ -162,7 +162,7 @@ public class ReservationService {
     public Reservation getReservationById(String currentUserName, long reservationId) {
         // This query fetches the reservation row and ONLY its linked seats
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElse(null);
+                .orElseThrow( () -> new ReservationNotFoundException(RESERVATION_NOT_FOUND, HttpStatus.NOT_FOUND));
 
         // Security check we discussed
         if (!reservation.getUser().getUsername().equals(currentUserName)) {
