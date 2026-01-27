@@ -50,6 +50,8 @@ public class SeatService {
 
     public List<Seat> getSeatsByShow(Long showId) {
 
+        Show show = showRepository.findById(showId)
+                .orElseThrow(()->  new ShowNotFoundException(SHOW_NOT_FOUND,HttpStatus.NOT_FOUND) );
 
 
         String key = "seats:show:" + showId;
