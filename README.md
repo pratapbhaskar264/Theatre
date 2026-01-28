@@ -17,7 +17,6 @@ The architecture is built to handle real-world scenarios such as user authentica
 * Authentication is mandatory for all protected endpoints.
 * After successful authentication, the user is assigned a role.
 
-### Step 2: Role Assignment and Authorization
 
 The system follows Role-Based Access Control (RBAC).
 
@@ -25,6 +24,17 @@ Roles and Responsibilities:
 
 * ADMIN: Manages movies, shows, and system-level operations
 * USER: Browses movies, views shows, and books seats
+### Role-Based Access Control (RBAC) Hierarchy
+The system enforces security through three distinct tiers of authority:
+
+* SUPER_ADMIN
+The highest authority level. This role is responsible for User Management (creating or promoting other ADMIN accounts), managing global system properties, and performing sensitive database operations.
+
+* ADMIN
+The operational manager. This role focuses on Resource Management, specifically handling Movies, Theatres, and Shows. They have full CRUD (Create, Read, Update, Delete) permissions over the theater infrastructure but cannot modify other admin accounts.
+
+* USER
+The standard customer role. This role is restricted to Consumer Actions, such as browsing the movie catalog, viewing showtimes, and managing their own Reservations and seat selections.
 
 Authorization is enforced at the API level to ensure users can only perform actions allowed by their role.
 
