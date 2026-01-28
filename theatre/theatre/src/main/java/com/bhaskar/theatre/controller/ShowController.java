@@ -183,10 +183,8 @@ public class ShowController {
 
     @Secured({"ROLE_ADMIN", "ROLE_SUPER_ADMIN"})
     @DeleteMapping("/show/delete/{showId}")
-    public ResponseEntity<?> deleteShowById(@PathVariable long showId){
+    public ResponseEntity<?> deleteShowById(@PathVariable long showId) {
         showService.deleteShowById(showId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-
-
 }
