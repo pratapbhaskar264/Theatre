@@ -56,7 +56,7 @@ public class ShowService {
 
         // 2. Fallback to DB
         Show show = showRepository.findById(showId)
-                .orElseThrow(() -> new RuntimeException("Show not found"));
+                .orElseThrow(() -> new ShowNotFoundException(SHOW_NOT_FOUND,HttpStatus.NOT_FOUND) );
 
         List<Seat> seats = show.getSeats();
 
