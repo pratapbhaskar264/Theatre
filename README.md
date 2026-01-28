@@ -43,7 +43,7 @@ Authorization is enforced at the API level to ensure users can only perform acti
 * Admins can create, update, and delete movies.
 * A movie can have multiple associated shows.
 
-Cascade Deletion Logic:
+Cascade Deletion Logic :
 
 * When a movie is deleted:
 
