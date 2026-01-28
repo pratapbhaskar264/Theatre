@@ -171,19 +171,22 @@ This layered security approach ensures both identity verification and permission
 
 ---
 
-## 8. Complexity and Scalability Considerations
+## 8. Technical Requirements & Stack
+This project is built using a modern, event-driven architecture to handle high-concurrency ticket bookings.
 
-Time Complexity:
+### Core Backend
+Java 17+: Utilizes the Streams API for efficient seat filtering and data transformation.
 
-* Redis cache access: O(1) average
-* Kafka message append: O(1)
+Spring Boot 3.x: The foundation of the microservice, leveraging Spring Data JPA for database interactions.
 
-System-Level Benefits:
+Spring Security: Implements Role-Based Access Control (RBAC) with JWT (JSON Web Tokens) for secure stateless authentication.
 
-* Reduced database load
-* Horizontal scalability
-* Fault tolerance via message replay and cache expiration
+### Data & Messaging
+PostgreSQL: The primary relational database used for storing persistent entities like Movies, Theatres, and Reservations.
 
+Apache Kafka: Acts as the message broker, using a Producer-Consumer model to handle real-time booking and cancellation events via the theatre-activity topic.
+
+Redis: Used as a high-speed caching layer to store and evict Seat Structure data, ensuring lightning-fast availability checks.
 ---
 
 ## 9. Conclusion
