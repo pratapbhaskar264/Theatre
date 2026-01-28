@@ -82,7 +82,7 @@ Concurrency and consistency are handled to prevent double booking.
 
 Authentication:
 
-* POST /auth/signup
+* POST /auth/signup : http://localhost:8080/auth/signup
 * POST /auth/login
 
 Movies (Admin Only):
