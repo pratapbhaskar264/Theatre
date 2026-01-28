@@ -20,10 +20,6 @@ The architecture is built to handle real-world scenarios such as user authentica
 
 The system follows Role-Based Access Control (RBAC).
 
-Roles and Responsibilities:
-
-* ADMIN: Manages movies, shows, and system-level operations
-* USER: Browses movies, views shows, and books seats
 ### Role-Based Access Control (RBAC) Hierarchy
 The system enforces security through three distinct tiers of authority:
 
