@@ -83,23 +83,23 @@ Concurrency and consistency are handled to prevent double booking.
 Authentication:
 
 * POST /auth/signup : http://localhost:8080/auth/signup
-* POST /auth/login
+* POST /auth/login : http://localhost:8080/auth/authenticate
 
 Movies (Admin Only):
 
-* POST /movies
-* DELETE /movies/{movieId}
-* GET /movies
+* POST /movies : http://localhost:8080/api/v1/movies/create
+* DELETE /movies/{movieId} : http://localhost:8080/api/v1/movies/movie/delete/{movieId}
+* GET /movies : http://localhost:8080/api/v1/movies/all
 
 Shows:
 
-* POST /shows (Admin)
-* GET /shows?movieId=
+* POST /shows (Admin) : http://localhost:8080/api/v1/shows/show/create
+* GET /shows?movieId : http://localhost:8080/api/v1/movies/movie/show/{movieId}
 
 Booking:
 
-* POST /bookings
-* GET /bookings/user
+* POST /bookings : http://localhost:8080/api/v1/reservations/reserve
+* GET /bookings/user : http://localhost:8080/api/v1/reservations/reservation/{reservationId}
 
 All endpoints are protected based on role and authentication state.
 
