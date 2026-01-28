@@ -187,6 +187,8 @@ PostgreSQL: The primary relational database used for storing persistent entities
 Apache Kafka: Acts as the message broker, using a Producer-Consumer model to handle real-time booking and cancellation events via the theatre-activity topic.
 
 Redis: Used as a high-speed caching layer to store and evict Seat Structure data, ensuring lightning-fast availability checks.
+
+
 ---
 
 ## 9. Conclusion
